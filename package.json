@@ -1,0 +1,8 @@
+{
+  "name": "aora-project",
+  "private": true,
+  "workspaces": [
+    "Aora Back",
+    "Aora_Front"
+  ]
+}
