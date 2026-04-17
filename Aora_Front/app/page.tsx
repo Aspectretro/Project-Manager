@@ -53,7 +53,7 @@ export default function DevLandingPage() {
           </div>
 
           <Button variant="ghost" className="w-full justify-start gap-2">
-            <Link href="/dashboard/settings">
+            <Link href="/Dashboard/Setting">
               <Settings size={18} />
               Settings Page
             </Link>
