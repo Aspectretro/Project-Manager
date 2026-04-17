@@ -21,11 +21,11 @@ const items = [
 
 export function AppSidebar() {
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
+    <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader className="p-4 border-b">
         <div className="flex items-center gap-2 font-bold text-xl">
           <div className="bg-slate-900 text-white p-1 rounded">✔</div>
-          <span>TodoApp</span>
+          <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">TodoApp</span>
         </div>
       </SidebarHeader>
 
@@ -39,7 +39,7 @@ export function AppSidebar() {
                   <SidebarMenuButton tooltip={item.title}>
                     <a href={item.url}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">{item.title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
