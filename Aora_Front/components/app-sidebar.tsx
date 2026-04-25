@@ -55,7 +55,7 @@ export function AppSidebar() {
               <SidebarMenuButton>
                 <a href="/settings">
                   <Settings />
-                  <span>Settings</span>
+                  <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">Settings</span>
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
