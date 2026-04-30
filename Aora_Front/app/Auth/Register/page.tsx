@@ -7,10 +7,52 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+
+  const router = useRouter();
+  const [email, setEmail] = useState("")
+  const [error, setError] = useState("")
+  const [confirm, setConfirm] = useState("")
+  const [success, setSuccess] = useState("")
   const [password, setPassword] = useState("");
-  const strength = password.length >= 8 ? (/[^A-Za-z0-9]/.test(password) ? 100 : 66) : (password.length > 0 ? 33 : 0);
+  const strength = password.length >= 8 
+    ? (/[^A-Za-z0-9]/.test(password) ? 100 : 66) 
+    : (password.length > 0 ? 33 : 0);
+
+// Register Handling
+  async function handleRegister() {
+    setError("");
+    setSuccess("");
+
+    if (password !== confirm) {
+      setError("Password do not match")
+      return;
+    }
+
+    if (password.length < 8 ) {
+      setError("Password must be at least 8 characters")
+      return;
+    }
+
+    const res = await fetch("http://localhost:5000/register", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      credentials: "include",
+      body: JSON.stringify({email, password})
+    });
+
+    const data = await res.json()
+
+    if (res.ok) {
+      setSuccess("Account created! Redirecting to login...");
+      setTimeout(() => router.push("/Auth/Login"), 1500);
+    } else {
+      setError(data.error);
+    }
+  }
+
 
   return (
     <div className="flex min-h-screen w-full">
@@ -28,24 +70,57 @@ export default function RegisterPage() {
               <CardDescription>Join our community today.</CardDescription>
             </CardHeader>
             <CardContent>
+
               <div className="grid w-full items-center gap-4">
                 <div className="grid gap-1.5">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="name@example.com" />
+                  <Input 
+                  id="email" 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com" />
                 </div>
+
                 <div className="grid gap-1.5">
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+                  <Input 
+                  id="password" 
+                  type="password" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
                   <Progress value={strength} className="h-1 mt-1" />
+                  <p className="text-xs text-muted-foreground">
+                    {strength === 0 && "Enter a password"}
+                    {strength === 33 && "Weak - too short"}
+                    {strength === 66 && "Medium - add special characters"}
+                    {strength === 100 && "Strong password!"}
+                  </p>
                 </div>
+
                 <div className="grid gap-1.5">
                   <Label htmlFor="confirm">Confirm Password</Label>
-                  <Input id="confirm" type="password" placeholder="••••••••" />
+                  <Input 
+                  id="confirm" 
+                  type="password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)} 
+                  placeholder="••••••••" />
                 </div>
+
+                {error && (
+                  <p className="text-red-500 text-sm text-center">{error}</p>
+                )}
+                {success && (
+                  <p className="text-green-600 text-sm text-center">{success}</p>
+                )}
               </div>
             </CardContent>
+            
             <CardFooter className="flex flex-col gap-4">
-              <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white">Get Started</Button>
+              <Button 
+              onClick={handleRegister}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white">Get Started</Button>
               <p className="text-sm text-muted-foreground text-center">
                 Already a member? <Link href="/Auth/Login" className="text-primary font-medium hover:underline">Login</Link>
               </p>
