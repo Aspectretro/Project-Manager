@@ -4,7 +4,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
-      
+
       {/* Grid of Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -13,7 +13,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">128</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+            <p className="text-xs text-muted-foreground">
+              +20.1% from last month
+            </p>
           </CardContent>
         </Card>
 
@@ -34,7 +36,9 @@ export default function DashboardPage() {
           <CardTitle>Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-slate-500">Your recent tasks and notifications will appear here.</p>
+          <p className="text-slate-500">
+            Your recent tasks and notifications will appear here.
+          </p>
         </CardContent>
       </Card>
     </div>
