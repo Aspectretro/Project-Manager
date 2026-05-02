@@ -9,7 +9,7 @@ app.secret_key = "your-secret-key"
 CORS(app, supports_credentials=True)
 
 def get_db():
-    conn = sqlite3.connect("project.db")
+    conn = sqlite3.connect("user.db")
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
@@ -36,3 +36,27 @@ def register():
     
     except sqlite3.IntegrityError:
         return jsonify({"error": "Email already exists"}), 409
+    
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json
+
+    email = data.get("email", "").strip()
+    password = data.get("password", "").strip()
+
+    if not email or not password:
+        return jsonify({"error": "All fields are required"}), 400
+
+    with get_db() as conn:
+        user = conn.execute(
+            "SELECT * FROM user WHERE email = ?", (email,)
+        ).fetchone()
+    
+    if not user or not check_password_hash(user["password"], password):
+        return jsonify({"error": "Incorret email or password"}), 401
+    
+    session["user_id"] = user["user_id"]
+    return jsonify({"message": "Logged in!", "user_id": user["user_id"]}), 200
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)

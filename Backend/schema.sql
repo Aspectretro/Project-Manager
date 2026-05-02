@@ -10,10 +10,7 @@
 CREATE TABLE IF NOT EXISTS user (
     user_id       INTEGER  PRIMARY KEY AUTOINCREMENT,
     email         TEXT     NOT NULL,
-    username      TEXT     NOT NULL,
     password      CHAR(128) NOT NULL,
-    profession    TEXT     NOT NULL,
-    age_group     TEXT     NOT NULL,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -38,11 +35,10 @@ CREATE TABLE IF NOT EXISTS task (
     status      TEXT CHECK(status IN ('todo', 'in_progress', 'done')) DEFAULT 'todo',
     priority    TEXT CHECK(priority IN ('low', 'medium', 'high')) DEFAULT 'medium',
     due_date    DATE,
-    created_date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    FOREIGN KEY (project_id) REFERENCES project(member_id),
-    FOREIGN KEY (assignee_id) REFERENCES user(user_id)
+    created_date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES project(member_id)
 );
-
+ 
 CREATE TABLE IF NOT EXISTS project_members (
     project_id  INTEGER NOT NULL,
     user_id     INTEGER NOT NULL,
