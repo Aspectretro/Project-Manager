@@ -1,10 +1,10 @@
--- sql queries --
-
 /*
   Begin Tables
 
   Age group would be defined by intervals, 
   and each would be labeled by alphabetical order
+
+  Insert new columns in the user table after the profile creation/set-up page is done
 */
 
 CREATE TABLE IF NOT EXISTS user (

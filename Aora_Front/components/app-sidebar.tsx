@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar"
 
 const items = [
-  { title: "Home", url: "#", icon: Home },
+  { title: "Home", url: "/Dashboard", icon: Home },
   { title: "Inbox", url: "#", icon: Inbox },
   { title: "Calendar", url: "#", icon: Calendar },
   { title: "Search", url: "#", icon: Search },
@@ -22,14 +22,14 @@ const items = [
 export function AppSidebar() {
   return (
     <Sidebar variant="inset" collapsible="icon">
-      <SidebarHeader className="p-4 border-b">
+      <SidebarHeader className="p-4">
         <div className="flex items-center gap-2 font-bold text-xl">
           <div className="bg-slate-900 text-white p-1 rounded">✔</div>
-          <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">TodoApp</span>
+          <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">Aora</span>
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="p-2 gap-4">
+      <SidebarContent className="gap-4">
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -53,7 +53,7 @@ export function AppSidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton>
-                <a href="/settings">
+                <a href="/Dashboard/Setting">
                   <Settings />
                   <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">Settings</span>
                 </a>
@@ -63,10 +63,12 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t">
+      <SidebarFooter>
         <SidebarMenuButton className="w-full justify-start gap-2">
-          <User className="w-4 h-4" />
-          <span className="truncate text-xs font-medium">user@example.com</span>
+          <a href="/Dashboard/Profile">
+            <User className="w-4 h-4" />
+            <span className="truncate text-xs font-medium">user@example.com</span>
+          </a>
         </SidebarMenuButton>
       </SidebarFooter>
     </Sidebar>
