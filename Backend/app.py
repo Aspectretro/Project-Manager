@@ -39,7 +39,7 @@ def register():
     
 @app.route("/login", methods=["POST"])
 def login():
-    data = request.get_json
+    data = request.get_json()
 
     email = data.get("email", "").strip()
     password = data.get("password", "").strip()
@@ -57,6 +57,8 @@ def login():
     
     session["user_id"] = user["user_id"]
     return jsonify({"message": "Logged in!", "user_id": user["user_id"]}), 200
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
