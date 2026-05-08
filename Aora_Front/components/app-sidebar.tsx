@@ -16,10 +16,10 @@ const items = [
   { title: "Home", url: "/Dashboard", icon: Home },
   { title: "Inbox", url: "#", icon: Inbox },
   { title: "Calendar", url: "#", icon: Calendar },
-  { title: "Search", url: "#", icon: Search },
 ]
 
 export function AppSidebar() {
+
   return (
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader className="p-4">
@@ -67,7 +67,9 @@ export function AppSidebar() {
         <SidebarMenuButton className="w-full justify-start gap-2">
           <a href="/Dashboard/Profile">
             <User className="w-4 h-4" />
-            <span className="truncate text-xs font-medium">user@example.com</span>
+            <span className="truncate text-xs font-medium transition-all duration-200 group-data-[collapsible=icon]:hidden">
+              email
+              </span>
           </a>
         </SidebarMenuButton>
       </SidebarFooter>
