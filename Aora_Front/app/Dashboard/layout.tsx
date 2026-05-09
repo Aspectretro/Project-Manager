@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <header className="flex h-16 items-center border-b bg-white px-6 gap-3">
             <SidebarTrigger />
             <div className="font-semibold text-slate-800">My Workspace</div>
-            <a className="font-semibold text-slate-800" href="/Event">Add Event</a>
+            <a className="font-semibold text-slate-800" href="/Event">Add Task</a>
           </header>
           
           {/* Page Content */}

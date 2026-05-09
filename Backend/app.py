@@ -58,7 +58,25 @@ def login():
     session["user_id"] = user["user_id"]
     return jsonify({"message": "Logged in!", "user_id": user["user_id"]}), 200
 
+@app.route("/event", methods=["POST"])
+def event():
+    data = request.get_json()
+    title = data.get("title", "").strip()
+    content = data.get("content", "").strip()
+    tag = data.get("tag", "")
+    due_date = data.get("due_date")
 
+    if not title:
+        return jsonify({"error": "A title is required"}), 400
+    
+    with get_db() as conn:
+        conn.execute(
+            "INSERT INTO task (title, content, tag, due_date)"
+            "VALUES (?, ?, ?, ?)",
+            (title, content, tag, due_date)
+        )
+    
+    return jsonify({"message": "Task Created"}), 201
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
