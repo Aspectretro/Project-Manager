@@ -31,6 +31,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { useRouter } from "next/navigation"
+import { se } from "date-fns/locale"
 
 
 export default function Event() {
@@ -38,12 +39,10 @@ export default function Event() {
   const router = useRouter()
   const [title, setTitle] = useState("")
   const [error, setError] = useState("")
-  const [confirm, setConfirm] = useState("")
   const [success, setSuccess] = useState("")
   const [content, setContent] = useState("")
   const [tag, setTag] = useState("")
-  const [due_date, setDue_date] = useState("");
-
+  const [due_date, setDue_date] = useState("")
   const [date, setDate] = React.useState<Date>()
 
   const [range, setRange] = React.useState<DateRange | undefined>({
@@ -54,8 +53,14 @@ export default function Event() {
   async function insertEevent() {
 
     setError("");
+    setSuccess("");
 
-    const res = await fetch("http://loalhost:5000", {
+    if (!title) {
+      setError("Title is required");
+      return;
+    }
+
+    const res = await fetch("http://localhost:5000/events", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       credentials: "include",
@@ -111,8 +116,8 @@ export default function Event() {
                 <div className="grid gap-1.5">
                   <Label htmlFor="tags">Tag</Label>
                   <Select
-                  id="tag"
                   value={tag}
+                  onValueChange={(value) => setTag(value ?? "")}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Tags" />
@@ -146,7 +151,10 @@ export default function Event() {
                       <Calendar
                         mode="single"
                         selected={date}
-                        onSelect={setDate}
+                        onSelect={(selectedDate) => {
+                          setDate(selectedDate)
+                          setDue_date(selectedDate ? format(selectedDate, "yyyy-MM-dd") : "")
+                        }}
                         defaultMonth={date}
                       />
                     </PopoverContent>
@@ -155,7 +163,11 @@ export default function Event() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              <Button className="w-full bg-slate-900 text-white hover:bg-slate-700">
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              {success && <p className="text-sm text-green-500">{success}</p>}
+              <Button
+              onClick={insertEevent}
+              className="w-full bg-slate-900 text-white hover:bg-slate-700">
                 Create
               </Button>
             </CardFooter>

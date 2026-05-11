@@ -71,7 +71,7 @@ def event():
     
     with get_db() as conn:
         conn.execute(
-            "INSERT INTO task (title, content, tag, due_date)"
+            "INSERT INTO task (title, content, tag, due_date) "
             "VALUES (?, ?, ?, ?)",
             (title, content, tag, due_date)
         )
