@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { format, addDays } from "date-fns"
-import { type Daterange } from "react-day-picker"
+import { type DateRange } from "react-day-picker"
+import { useState } from "react"
 import { ChevronDownIcon } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -29,16 +30,46 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { useRouter } from "next/navigation"
 
 
 export default function Event() {
 
+  const router = useRouter()
+  const [title, setTitle] = useState("")
+  const [error, setError] = useState("")
+  const [confirm, setConfirm] = useState("")
+  const [success, setSuccess] = useState("")
+  const [content, setContent] = useState("")
+  const [tag, setTag] = useState("")
+  const [due_date, setDue_date] = useState("");
+
   const [date, setDate] = React.useState<Date>()
 
-  const [range, setRange] = React.useState<Daterange | undefined>({
+  const [range, setRange] = React.useState<DateRange | undefined>({
     from: new Date(new Date().getFullYear(), 11, 8),
     to: addDays(new Date(new Date().getFullYear(), 11, 8), 10)
   })
+
+  async function insertEevent() {
+
+    setError("");
+
+    const res = await fetch("http://loalhost:5000", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      credentials: "include",
+      body: JSON.stringify({title, content, tag, due_date})
+    })
+
+    const data = await res.json()
+
+    if (res.ok) {
+      setSuccess("Task created");
+    } else {
+      setError(data.error);
+    }
+  }
 
   return (
     <div className="flex min-h-screen w-full">
@@ -62,15 +93,27 @@ export default function Event() {
               <div className="grid w-full items-center gap-4">
                 <div className="grid gap-1.5">
                   <Label htmlFor="title">Title</Label>
-                  <Input id="title" type="text" placeholder="Task Name..." />
+                  <Input 
+                  id="title"
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Task Name..." />
                 </div>
                 <div className="grid gap-1.5">
-                  <Label htmlFor="content">Task Description</Label>
-                  <Textarea id="content" placeholder="Task Description" />
+                  <Label htmlFor="content">Task Description/Content</Label>
+                  <Textarea
+                  id="content"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Task Description" />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="tags">Tag</Label>
-                  <Select>
+                  <Select
+                  id="tag"
+                  value={tag}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Tags" />
                     </SelectTrigger>
@@ -124,6 +167,9 @@ export default function Event() {
        <Card className="mx-auto w-fit p-0 scale-125">
         <CardContent className="p-5">
           <Calendar
+
+           id="date"
+           
            mode="range"
            defaultMonth={range?.from}
            selected={range}
