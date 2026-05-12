@@ -53,7 +53,7 @@ def login():
         ).fetchone()
     
     if not user or not check_password_hash(user["password"], password):
-        return jsonify({"error": "Incorret email or password"}), 401
+        return jsonify({"error": "Incorrect email or password"}), 401
     
     session["user_id"] = user["user_id"]
     return jsonify({"message": "Logged in!", "user_id": user["user_id"]}), 200

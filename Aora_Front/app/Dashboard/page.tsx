@@ -1,4 +1,12 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import React, { useState, useEffect } from 'react'
+
+interface Databseitem {
+  id: number;
+  
+}
 
 export default function DashboardPage() {
   return (

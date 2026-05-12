@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
+import { useRouter } from "next/navigation"
 import {
   Card,
   CardContent,
@@ -30,12 +31,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { useRouter } from "next/navigation"
-import { se } from "date-fns/locale"
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export default function Event() {
-
   const router = useRouter()
   const [title, setTitle] = useState("")
   const [error, setError] = useState("")
@@ -47,32 +52,31 @@ export default function Event() {
 
   const [range, setRange] = React.useState<DateRange | undefined>({
     from: new Date(new Date().getFullYear(), 11, 8),
-    to: addDays(new Date(new Date().getFullYear(), 11, 8), 10)
+    to: addDays(new Date(new Date().getFullYear(), 11, 8), 10),
   })
 
   async function insertEevent() {
+    setError("")
+    setSuccess("")
 
-    setError("");
-    setSuccess("");
-
-    if (!title) {
-      setError("Title is required");
-      return;
+    if (!title || !date) {
+      setError("Required fields are missing")
+      return
     }
 
-    const res = await fetch("http://localhost:5000/events", {
+    const res = await fetch("http://localhost:5000/event", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({title, content, tag, due_date})
+      body: JSON.stringify({ title, content, tag, due_date }),
     })
 
     const data = await res.json()
 
     if (res.ok) {
-      setSuccess("Task created");
+      setSuccess("Task created")
     } else {
-      setError(data.error);
+      setError(data.error)
     }
   }
 
@@ -98,26 +102,28 @@ export default function Event() {
               <div className="grid w-full items-center gap-4">
                 <div className="grid gap-1.5">
                   <Label htmlFor="title">Title</Label>
-                  <Input 
-                  id="title"
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Task Name..." />
+                  <Input
+                    id="title"
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Task Name..."
+                  />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="content">Task Description/Content</Label>
                   <Textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Task Description" />
+                    id="content"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Task Description"
+                  />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="tags">Tag</Label>
                   <Select
-                  value={tag}
-                  onValueChange={(value) => setTag(value ?? "")}
+                    value={tag}
+                    onValueChange={(value) => setTag(value ?? "")}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Tags" />
@@ -153,7 +159,11 @@ export default function Event() {
                         selected={date}
                         onSelect={(selectedDate) => {
                           setDate(selectedDate)
-                          setDue_date(selectedDate ? format(selectedDate, "yyyy-MM-dd") : "")
+                          setDue_date(
+                            selectedDate
+                              ? format(selectedDate, "yyyy-MM-dd")
+                              : ""
+                          )
                         }}
                         defaultMonth={date}
                       />
@@ -163,55 +173,79 @@ export default function Event() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              {success && <p className="text-sm text-green-500">{success}</p>}
+              <AlertDialog>
+                <AlertDialogTrigger
+                  render={
+                    <Button
+                      onClick={insertEevent}
+                      className="w-[80%] bg-slate-800 text-white hover:bg-slate-700"
+                    >
+                      Create
+                    </Button>
+                  }
+                ></AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogTitle>
+                    {error && <p className="text-sm text-red-500">{error}</p>}
+                    {success && (
+                      <p className="text-sm text-green-500">{success}</p>
+                    )}
+                  </AlertDialogTitle>
+                  <AlertDialogCancel>Add Task</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => router.push("/Dashboard")}>
+                    Return to Dashboard
+                  </AlertDialogAction>
+                </AlertDialogContent>
+              </AlertDialog>
+
               <Button
-              onClick={insertEevent}
-              className="w-full bg-slate-900 text-white hover:bg-slate-700">
-                Create
+                onClick={() => router.push("/Dashboard")}
+                className="w-[80%] bg-mist-800 text-white hover:bg-mist-700"
+              >
+                Return to dashboard
               </Button>
             </CardFooter>
           </Card>
         </div>
       </div>
 
-      <div className="hidden lg:flex lg:[50%] ml-40 items-center justify-center p-12 text-white">
-       <Card className="mx-auto w-fit p-0 scale-125">
-        <CardContent className="p-5">
-          <Calendar
+      <div className="lg:[50%] ml-40 hidden items-center justify-center p-12 text-white lg:flex">
+        <Card className="mx-auto w-fit scale-125 p-0">
+          <CardContent className="p-5">
+            <Calendar
+              id="date"
+              mode="range"
+              defaultMonth={range?.from}
+              selected={range}
+              onSelect={setRange}
+              numberOfMonths={1}
+              captionLayout="dropdown"
+              className="md:[--cell-size--spacing(12)] [--cell-size:--spacing(10)]"
+              formatters={{
+                formatMonthDropdown: (date) => {
+                  return date.toLocaleDateString("default", { month: "long" })
+                },
+              }}
+              components={{
+                DayButton: ({ children, modifiers, day, ...props }) => {
+                  const isWeekend =
+                    day.date.getDay() === 0 || day.date.getDay() === 6
 
-           id="date"
-           
-           mode="range"
-           defaultMonth={range?.from}
-           selected={range}
-           onSelect={setRange}
-           numberOfMonths={1}
-           captionLayout="dropdown"
-           className="[--cell-size:--spacing(10)] md:[--cell-size--spacing(12)]"
-           formatters={{
-            formatMonthDropdown: (date) => {
-              return date.toLocaleDateString("default", {month:"long"})
-            },
-           }}
-           components={{
-            DayButton: ({ children, modifiers, day, ...props }) => {
-              const isWeekend = 
-               day.date.getDay() === 0 || day.date.getDay() === 6
-              
-              return (
-                <CalendarDayButton day={day} modifiers={modifiers} {...props}>
-                  {children}
-                  {!modifiers.outside && (
-                    <span></span>
-                  )}
-                </CalendarDayButton>
-              )
-            }
-           }}
-          />
-        </CardContent>
-       </Card>
+                  return (
+                    <CalendarDayButton
+                      day={day}
+                      modifiers={modifiers}
+                      {...props}
+                    >
+                      {children}
+                      {!modifiers.outside && <span></span>}
+                    </CalendarDayButton>
+                  )
+                },
+              }}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
