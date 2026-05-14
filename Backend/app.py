@@ -2,7 +2,7 @@ import sqlite3
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
-import datetime
+from flask_login import *
 
 app = Flask(__name__)
 app.secret_key = "your-secret-key"
@@ -57,6 +57,12 @@ def login():
     
     session["user_id"] = user["user_id"]
     return jsonify({"message": "Logged in!", "user_id": user["user_id"]}), 200
+
+#TODO: login authentication
+@app.route("/user", methods=["GET"])
+def user():
+    pass
+
 
 @app.route("/event", methods=["POST"])
 def event():

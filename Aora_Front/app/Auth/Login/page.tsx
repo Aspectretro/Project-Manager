@@ -1,77 +1,110 @@
 "use client"
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 export default function LoginPage() {
-
   const router = useRouter()
-  const [email, setEmail] = useState("");
-  const [password, setPassowrd] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState("")
+  const [password, setPassowrd] = useState("")
+  const [error, setError] = useState("")
 
   async function handle_login() {
-    setError("");
+    setError("")
 
     if (!email || !password) {
       setError("Both fields are required")
-      return;
+      return
     }
 
     const res = await fetch("http://localhost:5000/login", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({email, password})
+      body: JSON.stringify({ email, password }),
     })
 
-    const data = await res.json();
+    const data = await res.json()
 
     if (res.ok) {
       router.push("/Dashboard")
     } else {
-      setError(data.error);
+      setError(data.error)
     }
   }
 
   return (
     <div className="flex min-h-screen w-full">
       {/* LEFT SIDE (40%) */}
-      <div className="relative flex w-full lg:w-[40%] items-center justify-center overflow-hidden">
+      <div className="relative flex w-full items-center justify-center overflow-hidden lg:w-[40%]">
         <div className="absolute inset-0 -z-10">
-          <img src="/Sidebox.jpg" alt="Background" className="h-full w-full object-cover opacity-20" />
-          <div className="absolute inset-0 bg-slate-50 -z-20" />
+          <img
+            src="/Sidebox.jpg"
+            alt="Background"
+            className="h-full w-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 -z-20 bg-slate-50" />
         </div>
 
         <div className="z-10 px-4">
-          <Card className="w-[350px] shadow-2xl bg-white/90 backdrop-blur-md border-white/20">
+          <Card className="w-[350px] border-white/20 bg-white/90 shadow-2xl backdrop-blur-md">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-              <CardDescription>Log in to your account to continue.</CardDescription>
+              <CardDescription>
+                Log in to your account to continue.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid w-full items-center gap-4">
                 <div className="grid gap-1.5">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="name@example.com" value={email} onChange={(e)=> setEmail(e.target.value)}/>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassowrd(e.target.value)}/>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassowrd(e.target.value)}
+                  />
                 </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              <Button 
-              onClick={handle_login}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white">Login</Button>
-              <p className="text-sm text-muted-foreground text-center">
-                Don't have an account? <Link href="/Auth/Register" className="text-primary font-medium hover:underline">Register</Link>
+              <Button
+                onClick={handle_login}
+                className="w-full bg-slate-900 text-white hover:bg-slate-800"
+              >
+                Login
+              </Button>
+              <p className="text-center text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <Link
+                  href="/Auth/Register"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Register
+                </Link>
               </p>
             </CardFooter>
           </Card>
@@ -79,15 +112,26 @@ export default function LoginPage() {
       </div>
 
       {/* RIGHT SIDE (60%) - Login Specific Content */}
-      <div className="hidden lg:flex lg:w-[60%] bg-blue-900 items-center justify-center p-12 text-white">
+      <div className="hidden items-center justify-center bg-emerald-800 p-12 text-white lg:flex lg:w-[60%]">
         <div className="max-w-md space-y-4">
-          <h2 className="text-4xl font-bold italic tracking-tight">Focus on what matters.</h2>
-          <p className="text-blue-200 text-lg">Pick up exactly where you left off. Your tasks are waiting for you.</p>
-          <div className="pt-6 border-t border-blue-800">
-            <p className="italic text-sm text-blue-300">"This app helps me clear my head every morning." — Mark T.</p>
+          <div className="justify-ceter flex flex-col items-center gap-4">
+            <img src="/Login.jpg" className="w-[50%] rounded-[20px]" />
+          </div>
+          <div className="ml-[1.5rem]">
+            <h2 className="text-4xl font-bold tracking-tight italic">
+              Focus on what matters.
+            </h2>
+            <p className="text-lg text-emerald-200">
+              Pick up exactly where you left off.{" "}
+            </p>
+            <div className="border-t border-emerald-800 pt-6">
+              <p className="text-sm text-emerald-300 italic">
+                "What's due tomorrow, do tommorow." — Array U.
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,3 +1,5 @@
+"use client"
+
 import { Calendar, Home, Inbox, Search, Settings, User } from "lucide-react"
 import {
   Sidebar,
@@ -23,9 +25,11 @@ export function AppSidebar() {
   return (
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2 font-bold text-xl">
-          <div className="bg-slate-900 text-white p-1 rounded">✔</div>
-          <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">Aora</span>
+        <div className="flex items-center gap-2 text-xl font-bold">
+          <div className="rounded bg-slate-900 p-1 text-white">✔</div>
+          <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
+            Aora
+          </span>
         </div>
       </SidebarHeader>
 
@@ -39,7 +43,9 @@ export function AppSidebar() {
                   <SidebarMenuButton tooltip={item.title}>
                     <a href={item.url}>
                       <item.icon />
-                      <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">{item.title}</span>
+                      <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
+                        {item.title}
+                      </span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -55,7 +61,9 @@ export function AppSidebar() {
               <SidebarMenuButton>
                 <a href="/Dashboard/Setting">
                   <Settings />
-                  <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">Settings</span>
+                  <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
+                    Settings
+                  </span>
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -66,10 +74,10 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenuButton className="w-full justify-start gap-2">
           <a href="/Dashboard/Profile">
-            <User className="w-4 h-4" />
+            <User className="h-4 w-4" />
             <span className="truncate text-xs font-medium transition-all duration-200 group-data-[collapsible=icon]:hidden">
               email
-              </span>
+            </span>
           </a>
         </SidebarMenuButton>
       </SidebarFooter>
