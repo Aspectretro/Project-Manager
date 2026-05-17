@@ -1,10 +1,12 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import React, { useState, useEffect } from 'react'
+import { useTasks } from "@/hooks/useTasks"
 
 
 export default function DashboardPage() {
+  const { tasks, loading, error } = useTasks();
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
@@ -37,12 +39,20 @@ export default function DashboardPage() {
       {/* Main Content Area */}
       <Card className="min-h-[400px]">
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle>Tasks To Complete</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-slate-500">
-            Your recent tasks and notifications will appear here.
-          </p>
+          <div>
+            {loading && <p>Loading tasks...</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            {tasks.map((task) => (
+              <div key={task.task_id}>
+                <p>{task.title}</p>
+                <p>{task.tag}</p>
+                <p>{task.due_date}</p>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>

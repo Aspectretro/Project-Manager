@@ -13,6 +13,12 @@ def get_db():
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
+# Authentication
+def login_required():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    return None
+
 @app.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
@@ -57,12 +63,6 @@ def login():
     session["user_id"] = user["user_id"]
     return jsonify({"message": "Logged in!", "user_id": user["user_id"]}), 200
 
-def login_required():
-    if "user_id" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-    return None
-
-#TODO: login authentication
 @app.route("/me", methods=["GET"])
 def me():
     auth_error = login_required()
@@ -80,7 +80,7 @@ def me():
     
     return jsonify(dict(user)), 200
 
-
+# Task handling
 @app.route("/event", methods=["POST"])
 def event():
     data = request.get_json()
@@ -89,17 +89,33 @@ def event():
     tag = data.get("tag", "")
     due_date = data.get("due_date")
 
+    auth_error = login_required()
+    if auth_error: return auth_error
+
     if not title:
         return jsonify({"error": "A title is required"}), 400
     
     with get_db() as conn:
         conn.execute(
-            "INSERT INTO task (title, content, tag, due_date) "
-            "VALUES (?, ?, ?, ?)",
-            (title, content, tag, due_date)
+            "INSERT INTO task (user_id, title, content, tag, due_date) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (session["user_id"], title, content, tag, due_date)
         )
     
     return jsonify({"message": "Task Created"}), 201
+
+@app.route("/tasks", methods=["GET"])
+def get_tasks():
+    auth_error = login_required()
+    if auth_error: return auth_error
+
+    with get_db() as conn:
+        task = conn.execute(
+            "SELECT * FROM task WHERE user_id = ?",
+            (session["user_id"],)
+        ).fetchall()
+    
+    return jsonify([dict(t) for t in task]), 200
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
