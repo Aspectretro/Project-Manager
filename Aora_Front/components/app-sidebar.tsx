@@ -14,6 +14,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useUser } from "@/hooks/useUser";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const items = [
   { title: "Home", url: "/Dashboard", icon: Home },
@@ -23,6 +25,16 @@ const items = [
 
 export function AppSidebar() {
   const { user, loading } = useUser();
+  const router = useRouter();
+
+  function profileClick(e: React.MouseEvent) {
+    e.preventDefault();
+      if (!user) {
+        router.push("/Auth/Login");
+      } else {
+        router.push("/Dashboard/Profile");
+      }
+  }
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -75,7 +87,7 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <SidebarMenuButton className="w-full">
-          <a href="/Dashboard/Profile" className="flex items-center gap-2 w-full">
+          <a href="/Dashboard/Profile" onClick={profileClick} className="flex items-center gap-2 w-full">
             <User className="h-4 w-4" />
             <span className="truncate text-xs font-medium transition-all duration-200 group-data-[collapsible=icon]:hidden">
               {loading ? "Loading..." : user ? user.email : "Not logged in"}

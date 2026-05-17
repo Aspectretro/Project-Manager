@@ -37,6 +37,11 @@ export default function RegisterPage() {
     setError("")
     setSuccess("")
 
+    if (!email || !password) {
+      setError("All fields are required")
+      return
+    }
+
     if (password !== confirm) {
       setError("Password do not match")
       return
@@ -92,7 +97,7 @@ export default function RegisterPage() {
                   <Input
                     id="email"
                     type="email"
-                    value={email}
+                    value={email ?? ""}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
                   />
@@ -103,7 +108,7 @@ export default function RegisterPage() {
                   <Input
                     id="password"
                     type="password"
-                    value={password}
+                    value={password ?? ""}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                   />
@@ -121,7 +126,7 @@ export default function RegisterPage() {
                   <Input
                     id="confirm"
                     type="password"
-                    value={confirm}
+                    value={confirm ?? ""}
                     onChange={(e) => setConfirm(e.target.value)}
                     placeholder="••••••••"
                   />
