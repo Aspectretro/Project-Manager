@@ -2,11 +2,10 @@ import sqlite3
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import *
 
 app = Flask(__name__)
 app.secret_key = "your-secret-key"
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
 def get_db():
     conn = sqlite3.connect("user.db")
@@ -58,10 +57,28 @@ def login():
     session["user_id"] = user["user_id"]
     return jsonify({"message": "Logged in!", "user_id": user["user_id"]}), 200
 
+def login_required():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    return None
+
 #TODO: login authentication
-@app.route("/user", methods=["GET"])
-def user():
-    pass
+@app.route("/me", methods=["GET"])
+def me():
+    auth_error = login_required()
+    if auth_error:
+        return auth_error
+    
+    with get_db() as conn:
+        user = conn.execute(
+            "SELECT user_id, email, created_at FROM user WHERE user_id = ?",
+            (session["user_id"],)
+        ).fetchone()
+    
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    return jsonify(dict(user)), 200
 
 
 @app.route("/event", methods=["POST"])

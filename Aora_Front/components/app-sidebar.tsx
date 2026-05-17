@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, Home, Inbox, Search, Settings, User } from "lucide-react"
+import { Calendar, Home, Inbox, Settings, User } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useUser } from "@/hooks/useUser";
 
 const items = [
   { title: "Home", url: "/Dashboard", icon: Home },
@@ -21,6 +22,7 @@ const items = [
 ]
 
 export function AppSidebar() {
+  const { user, loading } = useUser();
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -72,11 +74,11 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenuButton className="w-full justify-start gap-2">
-          <a href="/Dashboard/Profile">
+        <SidebarMenuButton className="w-full">
+          <a href="/Dashboard/Profile" className="flex items-center gap-2 w-full">
             <User className="h-4 w-4" />
             <span className="truncate text-xs font-medium transition-all duration-200 group-data-[collapsible=icon]:hidden">
-              email
+              {loading ? "Loading..." : user ? user.email : "Not logged in"}
             </span>
           </a>
         </SidebarMenuButton>
