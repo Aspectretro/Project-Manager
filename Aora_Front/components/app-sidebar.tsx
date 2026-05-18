@@ -13,9 +13,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useUser } from "@/hooks/useUser";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useUser } from "@/hooks/useUser"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import { useTasks } from "@/hooks/useTasks"
 
 const items = [
   { title: "Home", url: "/Dashboard", icon: Home },
@@ -24,16 +25,17 @@ const items = [
 ]
 
 export function AppSidebar() {
-  const { user, loading } = useUser();
-  const router = useRouter();
+  const { user, loading } = useUser()
+  const router = useRouter()
+  const { tasks } = useTasks()
 
   function profileClick(e: React.MouseEvent) {
-    e.preventDefault();
-      if (!user) {
-        router.push("/Auth/Login");
-      } else {
-        router.push("/Dashboard/Profile");
-      }
+    e.preventDefault()
+    if (!user) {
+      router.push("/Auth/Login")
+    } else {
+      router.push("/Dashboard/Profile")
+    }
   }
 
   return (
@@ -47,24 +49,39 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="gap-4">
+      <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-1">
+            <SidebarMenu className="gap-2">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton tooltip={item.title}>
                     <a href={item.url}>
-                      <item.icon />
-                      <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
-                        {item.title}
-                      </span>
+                      <div className="flex items-center">
+                        <div className="flex-1">
+                          <item.icon />
+                        </div>
+                        <span className="ml-2 transition-all duration-200 group-data-[collapsible=icon]:hidden">
+                          {item.title}
+                        </span>
+                      </div>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Tasks</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenuItem className="gap-2">
+              {tasks.map((task) => (
+                  <p key={task.task_id}>{task.title}</p>
+              ))}
+            </SidebarMenuItem>
           </SidebarGroupContent>
         </SidebarGroup>
 
@@ -87,7 +104,11 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <SidebarMenuButton className="w-full">
-          <a href="/Dashboard/Profile" onClick={profileClick} className="flex items-center gap-2 w-full">
+          <a
+            href="/Dashboard/Profile"
+            onClick={profileClick}
+            className="flex w-full items-center gap-2"
+          >
             <User className="h-4 w-4" />
             <span className="truncate text-xs font-medium transition-all duration-200 group-data-[collapsible=icon]:hidden">
               {loading ? "Loading..." : user ? user.email : "Not logged in"}
