@@ -136,14 +136,25 @@ export default function SettingsPage() {
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-destructive">Danger Zone</h2>
         <Card className="border-destructive/20 bg-destructive/5">
-          <CardContent className="flex items-center justify-between pt-6">
-            <div className="space-y-0.5">
-              <Label className="text-base text-destructive">Purge Data</Label>
-              <p className="text-sm text-destructive/80">
-                Permanently delete all tasks and workspace history.
-              </p>
+          <CardContent>
+            <div className="m-2 flex items-center">
+              <div className="flex-1">
+                <Label className="text-base text-destructive">Purge Data</Label>
+                <p className="text-sm text-destructive/80">
+                  Permanently delete all tasks and workspace history.
+                </p>
+              </div>
+              <Button variant="destructive">Clear Everything</Button>
             </div>
-            <Button variant="destructive">Clear Everything</Button>
+            <div className="m-2 flex items-center">
+              <div className="flex-1">
+                <Label className="text-base text-destructive">Logout</Label>
+                <p className="text-sm text-destructive/80">
+                  Log out of the account
+                </p>
+              </div>
+              <Button variant="destructive">Logout</Button>
+            </div>
           </CardContent>
         </Card>
       </section>
