@@ -18,8 +18,23 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { useRouter } from "next/navigation"
 
 export default function SettingsPage() {
+
+  const router = useRouter()
+
+  async function handleLogout() {
+    const res = await fetch("http://localhost:5000/logout", {
+      method: "POST",
+      credentials: "include",
+    })
+
+    if (res.ok) {
+    router.push("/Auth/Login")
+  }
+}
+
   return (
     <div className="max-w-4xl space-y-8 pb-10">
       <div>
@@ -134,7 +149,7 @@ export default function SettingsPage() {
 
       {/* --- DATA MANAGEMENT --- */}
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-destructive">Danger Zone</h2>
+        <h2 className="text-lg font-semibold text-destructive">Clear Zone</h2>
         <Card className="border-destructive/20 bg-destructive/5">
           <CardContent>
             <div className="m-2 flex items-center">
@@ -153,7 +168,9 @@ export default function SettingsPage() {
                   Log out of the account
                 </p>
               </div>
-              <Button variant="destructive">Logout</Button>
+              <Button variant="destructive" onClick={handleLogout}>
+                Logout
+              </Button>
             </div>
           </CardContent>
         </Card>

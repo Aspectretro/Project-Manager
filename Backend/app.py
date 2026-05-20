@@ -63,6 +63,11 @@ def login():
     session["user_id"] = user["user_id"]
     return jsonify({"message": "Logged in!", "user_id": user["user_id"]}), 200
 
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return jsonify({"message": "Logged out!"}), 200
+
 @app.route("/me", methods=["GET"])
 def me():
     auth_error = login_required()
