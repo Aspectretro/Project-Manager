@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
 import { useRouter } from "next/navigation"
+import { useTasks } from "@/hooks/useTasks"
 import {
   Card,
   CardContent,
@@ -49,6 +50,11 @@ export default function Event() {
   const [tag, setTag] = useState("")
   const [due_date, setDue_date] = useState("")
   const [date, setDate] = React.useState<Date>()
+
+  const { tasks } = useTasks()
+  const taskDates = tasks
+    .filter((task) => task.due_date)
+    .map((task) => new Date(task.due_date))
 
   const [range, setRange] = React.useState<DateRange | undefined>({
     from: new Date(new Date().getFullYear(), 11, 8),
@@ -220,6 +226,10 @@ export default function Event() {
               onSelect={setRange}
               numberOfMonths={1}
               captionLayout="dropdown"
+              modifiers={{ hasTask: taskDates }}
+              modifiersClassNames={{
+                hasTask: "bg-slate-900 text-white rounded-full",
+              }}
               className="md:[--cell-size--spacing(12)] [--cell-size:--spacing(10)]"
               formatters={{
                 formatMonthDropdown: (date) => {
