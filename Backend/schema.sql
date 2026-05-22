@@ -5,6 +5,8 @@ Age group would be defined by intervals,
 and each would be labeled by alphabetical order
 
 Insert new columns in the user table after the profile creation/set-up page is done
+
+TODO: for future updated version, add a separate table for task vs events
  */
 CREATE TABLE
     IF NOT EXISTS user (

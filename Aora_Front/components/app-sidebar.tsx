@@ -56,8 +56,8 @@ export function AppSidebar() {
             <SidebarMenu className="gap-2">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton tooltip={item.title}>
-                    <a href={item.url}>
+                  <a href={item.url}>
+                    <SidebarMenuButton tooltip={item.title}>
                       <div className="flex items-center">
                         <div className="flex-1">
                           <item.icon />
@@ -66,22 +66,11 @@ export function AppSidebar() {
                           {item.title}
                         </span>
                       </div>
-                    </a>
-                  </SidebarMenuButton>
+                    </SidebarMenuButton>
+                  </a>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Tasks</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenuItem className="gap-2">
-              {tasks.map((task) => (
-                  <p key={task.task_id}>{task.title}</p>
-              ))}
-            </SidebarMenuItem>
           </SidebarGroupContent>
         </SidebarGroup>
 

@@ -2,10 +2,21 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTasks } from "@/hooks/useTasks"
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
 
 export default function DashboardPage() {
-  const { tasks, loading, error } = useTasks();
+  const { tasks, loading, error } = useTasks()
 
   return (
     <div className="space-y-6">
@@ -47,9 +58,50 @@ export default function DashboardPage() {
             {error && <p className="text-red-500">{error}</p>}
             {tasks.map((task) => (
               <div key={task.task_id}>
-                <p>{task.title}</p>
-                <p>{task.tag}</p>
-                <p>{task.due_date}</p>
+                <Card className="m-3">
+                  <CardHeader>
+                    {task.title}
+                    <hr />
+                  </CardHeader>
+                  <CardContent>
+                    <p>{task.content}</p>
+                    <p className="mb-[2px] text-xs text-muted-foreground">
+                      Task Due Date
+                    </p>
+                    <p>{task.due_date}</p>
+                    <AlertDialog>
+                      <AlertDialogTrigger render={<Button variant="outline" />}>
+                        Show Task Detail
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="text-lg">
+                            {task.title}
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            <div className="text-muted-forground text-xs">
+                              Task Description
+                            </div>
+                            <span className="text-base text-zinc-900">
+                              {task.content}
+                            </span>
+                            <div className="text-xs text-muted-foreground">
+                              Task Category
+                            </div>
+                            <span className="text-base text-zinc-900">
+                              {task.tag}
+                            </span>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction>Resolve</AlertDialogAction>
+                          <AlertDialogAction>Edit</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </CardContent>
+                </Card>
               </div>
             ))}
           </div>
