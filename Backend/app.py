@@ -122,5 +122,16 @@ def get_tasks():
     
     return jsonify([dict(t) for t in task]), 200
 
+#TODO: task edit
+# @app.route("/task_edit<int:id>", method=["GET","POST"])
+# def edit_tasl(id):
+#     data = request.get_json()
+#     title = data.get("title", "").strip()
+#     content = data.get("content", "").strip()
+#     tag = data.get("tag", "")
+#     due_date = data.get("due_date")
+
+#     upd_item = Item.query
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
