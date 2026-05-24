@@ -88,14 +88,15 @@ def me():
 # Task handling
 @app.route("/event", methods=["POST"])
 def event():
+    auth_error = login_required()
+    if auth_error: return auth_error
+
     data = request.get_json()
     title = data.get("title", "").strip()
     content = data.get("content", "").strip()
     tag = data.get("tag", "")
     due_date = data.get("due_date")
 
-    auth_error = login_required()
-    if auth_error: return auth_error
 
     if not title:
         return jsonify({"error": "A title is required"}), 400
@@ -115,23 +116,32 @@ def get_tasks():
     if auth_error: return auth_error
 
     with get_db() as conn:
-        task = conn.execute(
+        tasks = conn.execute(
             "SELECT * FROM task WHERE user_id = ?",
             (session["user_id"],)
         ).fetchall()
+
+    return jsonify([dict(t) for t in tasks]), 200
+
+@app.route("/tasks/<int:task_id>", methods=["PATCH"])
+def edit_task(task_id):
+    auth_error = login_required()
+    if auth_error: return auth_error
+
+    data = request.get_json()
+    title = data.get("title", "").strip()
+    content = data.get("content", "").strip()
+    tag = data.get("tag", "")
+    due_date = data.get("due_date")
+
+    with get_db() as conn:
+        conn.execute(
+            "UPDATE task SET title = ?, content = ?, tag = ?, due_date = ? "
+            "WHERE task_id = ? AND user_id = ?",
+            (title, content, tag, due_date, task_id, session["user_id"])
+        )
     
-    return jsonify([dict(t) for t in task]), 200
-
-#TODO: task edit
-# @app.route("/task_edit<int:id>", method=["GET","POST"])
-# def edit_tasl(id):
-#     data = request.get_json()
-#     title = data.get("title", "").strip()
-#     content = data.get("content", "").strip()
-#     tag = data.get("tag", "")
-#     due_date = data.get("due_date")
-
-#     upd_item = Item.query
+    return jsonify({"message": "Task Updated"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

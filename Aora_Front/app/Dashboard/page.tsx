@@ -14,9 +14,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 export default function DashboardPage() {
   const { tasks, loading, error } = useTasks()
+  const router = useRouter()
 
   return (
     <div className="space-y-6">
@@ -78,25 +80,31 @@ export default function DashboardPage() {
                           <AlertDialogTitle className="text-lg">
                             {task.title}
                           </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            <div className="text-muted-forground text-xs">
-                              Task Description
-                            </div>
-                            <span className="text-base text-zinc-900">
-                              {task.content}
-                            </span>
-                            <div className="text-xs text-muted-foreground">
-                              Task Category
-                            </div>
-                            <span className="text-base text-zinc-900">
-                              {task.tag}
-                            </span>
-                          </AlertDialogDescription>
+                          <div className="text-muted-foreground text-xs">
+                            Task Description
+                          </div>
+                          <span className="text-base text-zinc-900">
+                            {task.content}
+                          </span>
+                          <div className="text-xs text-muted-foreground">
+                            Task Category
+                          </div>
+                          <span className="text-base text-zinc-900">
+                            {task.tag}
+                          </span>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction>Resolve</AlertDialogAction>
-                          <AlertDialogAction>Edit</AlertDialogAction>
+                          <AlertDialogAction
+                            onClick={() =>
+                              router.push(
+                                `/Dashboard/EventEdit?task_id=${task.task_id}`
+                              )
+                            }
+                          >
+                            Edit
+                          </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
