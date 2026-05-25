@@ -1,78 +1,197 @@
+"use client"
+
 import Link from "next/link"
+import { useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { LayoutDashboard, LogIn, UserPlus, Settings, Home } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
 
-export default function DevLandingPage() {
+const features = [
+  {
+    title: "Task Management",
+    description:
+      "Create, organise, and track tasks with due dates, tags, and descriptions — all in one place.",
+  },
+  {
+    title: "Clean Dashboard",
+    description:
+      "See everything at a glance. Your tasks, progress, and deadlines without the noise.",
+  },
+  {
+    title: "Built for Focus",
+    description:
+      "No clutter. No distractions. Just you and what needs to get done.",
+  },
+]
+
+const steps = [
+  {
+    number: "01",
+    title: "Create an account",
+    description: "Sign up in seconds with just your email.",
+  },
+  {
+    number: "02",
+    title: "Add your tasks",
+    description: "Fill in a title, description, tag, and due date.",
+  },
+  {
+    number: "03",
+    title: "Stay on track",
+    description: "View and manage everything from your dashboard.",
+  },
+]
+
+export default function LandingPage() {
+  const heroRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = heroRef.current
+    if (!el) return
+    el.style.opacity = "0"
+    el.style.transform = "translateY(24px)"
+    requestAnimationFrame(() => {
+      el.style.transition = "opacity 0.8s ease, transform 0.8s ease"
+      el.style.opacity = "1"
+      el.style.transform = "translateY(0)"
+    })
+  }, [])
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center">
-          <div className="mb-2 flex justify-center">
-            <div className="rounded-lg bg-slate-900 p-2 text-white">
-              <Home size={24} />
-            </div>
-          </div>
-          <CardTitle className="text-2xl">Project Dev Hub</CardTitle>
-          <CardDescription>
-            Quick access to all active routes in the application.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="flex h-24 flex-col gap-2">
-              <Link href="/Auth/Login">
-                <LogIn size={20} />
-                Login
-              </Link>
-            </Button>
+    <div className="min-h-screen bg-background text-foreground">
 
-            <Button variant="outline" className="flex h-24 flex-col gap-2">
-              <Link href="/Auth/Register">
-                <UserPlus size={20} />
-                Register
-              </Link>
-            </Button>
+      {/* NAV */}
+      <nav className="sticky top-0 z-50 bg-background border-b border-border flex items-center justify-between px-8 py-4">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-foreground text-background rounded-md flex items-center justify-center text-xs">
+            ✔
           </div>
-
-          <Button size="lg" className="flex h-16 w-full gap-3 text-lg">
-            <Link href="/Dashboard">
-              <LayoutDashboard size={24} />
-              Go to Dashboard
-            </Link>
+          <span className="text-lg font-semibold tracking-tight">Aora</span>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Link href="/Auth/Login">Login</Link>
           </Button>
-
-          <div className="relative py-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-muted-foreground">
-                Internal Tools
-              </span>
-            </div>
-          </div>
-
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <Link href="/Dashboard/Setting">
-              <Settings size={18} />
-              Settings Page
-            </Link>
+          <Button size="sm">
+            <Link href="/Auth/Register">Sign up</Link>
           </Button>
-        </CardContent>
-        <footer className="p-6 pt-0 text-center">
-          <p className="text-xs text-slate-400">
-            Current Environment:{" "}
-            <span className="font-mono text-emerald-600">Development</span>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      {/* TODO: add a banner image as background */}
+      <section className="max-w-3xl mx-auto px-6 pt-28 pb-20 text-center">
+        <div ref={heroRef}>
+          <Badge className="mb-8 tracking-widest uppercase text-xs">
+            Task & Project Management
+          </Badge>
+
+          <h1 className="text-5xl sm:text-6xl font-normal leading-tight tracking-tight mb-6">
+            Everything you need
+            <br />
+            <em className="italic text-muted-foreground">to get things done.</em>
+          </h1>
+
+          <p className="text-muted-foreground text-lg leading-relaxed max-w-md mx-auto mb-10">
+            Aora helps you capture tasks, set deadlines, and stay focused —
+            without the complexity of tools you&apos;ll never fully use.
           </p>
-        </footer>
-      </Card>
+
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Button size="lg">
+              <Link href="/Auth/Register">Get started</Link>
+            </Button>
+            <Button size="lg" variant="outline">
+              <Link href="/Auth/Login">Log in</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-3xl mx-auto px-6">
+        <Separator />
+      </div>
+
+      {/* FEATURES */}
+      <section className="max-w-3xl mx-auto px-6 py-20">
+        <p className="text-xs tracking-widest uppercase text-muted-foreground mb-10">
+          What you get
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {features.map((f, i) => (
+            <Card key={i}>
+              <CardContent className="pt-6">
+                <Separator className="w-8 mb-5" />
+                <h3 className="font-semibold text-base tracking-tight mb-2">
+                  {f.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {f.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <div className="max-w-3xl mx-auto px-6">
+        <Separator />
+      </div>
+
+      {/* HOW IT WORKS */}
+      <section className="max-w-3xl mx-auto px-6 py-20">
+        <p className="text-xs tracking-widest uppercase text-muted-foreground mb-10">
+          How it works
+        </p>
+        <div className="flex flex-col gap-0">
+          {steps.map((s, i) => (
+            <div key={i}>
+              <div className="grid grid-cols-[60px_1fr] gap-4 items-start py-6">
+                <span className="text-xs tracking-widest text-muted-foreground pt-1">
+                  {s.number}
+                </span>
+                <div>
+                  <h3 className="font-semibold text-base tracking-tight mb-1">
+                    {s.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {s.description}
+                  </p>
+                </div>
+              </div>
+              {i < steps.length - 1 && <Separator />}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA BANNER */}
+      <section className="bg-foreground text-background py-24 px-6 text-center">
+        <h2 className="text-4xl font-normal tracking-tight mb-4">
+          Ready to get organised?
+        </h2>
+        <p className="text-base leading-relaxed mb-8 opacity-60">
+          Sign up in seconds. No credit card required.
+        </p>
+        <Button size="lg" variant="secondary">
+          <Link href="/Auth/Register">Create your account</Link>
+        </Button>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-border px-8 py-6 flex items-center justify-between flex-wrap gap-4 bg-background">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-foreground text-background rounded flex items-center justify-center text-xs">
+            ✔
+          </div>
+          <span className="text-sm font-semibold">Aora</span>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Aora. All rights reserved.
+        </p>
+      </footer>
+
     </div>
   )
 }
