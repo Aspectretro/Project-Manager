@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useTasks } from "@/hooks/useTasks"
+import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select"
 
 export default function EventEditPage() {
   const router = useRouter()
@@ -80,7 +82,7 @@ export default function EventEditPage() {
               <Input
                 id="title"
                 value={title ?? ""}
-                placeholder="Task title"
+                placeholder="Title"
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
@@ -91,17 +93,27 @@ export default function EventEditPage() {
                 value={content ?? ""}
                 placeholder="Task description"
                 onChange={(e) => setContent(e.target.value)}
-              />
+              ></Textarea>
             </div>
+
+            {/* TODO: Add user customisable tag, then map them.
+                In the profile page, there should be an alert dialogue to open all tag hence modifications
+            */}
             <div className="grid gap-1.5">
               <Label htmlFor="tag">Tag</Label>
-              <Input
-                id="tag"
-                value={tag ?? ""}
-                placeholder="Task tag"
-                onChange={(e) => setTag(e.target.value)}
-              />
+              <Select value={tag} onValueChange={(value) => setTag(value ?? "")}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a tag" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tag1">Tag 1</SelectItem>
+                  <SelectItem value="tag2">Tag 2</SelectItem>
+                  <SelectItem value="tag3">Tag 3</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+
+
             <div className="grid gap-1.5">
               <Label htmlFor="due_date">Due Date</Label>
               <Input

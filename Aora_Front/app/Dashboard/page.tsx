@@ -49,7 +49,10 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Content Area
+
+          TODO: This Section will be replaced by something else, as when amount of task begin to scale, this will get very messy
+      */}
       <Card className="min-h-[400px]">
         <CardHeader>
           <CardTitle>Tasks To Complete</CardTitle>
