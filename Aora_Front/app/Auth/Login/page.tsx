@@ -119,7 +119,7 @@ export default function LoginPage() {
           </div>
           <div className="ml-[1.5rem]">
             <h2 className="text-4xl font-bold tracking-tight italic">
-              Focus on what matters.
+              Focus on what's hard.
             </h2>
             <p className="text-lg text-emerald-200">
               Pick up exactly where you left off.{" "}

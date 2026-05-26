@@ -60,12 +60,11 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-
       {/* NAV */}
-      <nav className="sticky top-0 z-50 bg-background border-b border-border flex items-center justify-between px-8 py-4">
+      <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-border bg-background px-8 py-4">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-foreground text-background rounded-md flex items-center justify-center text-xs">
-            ✔
+          <div className="flex h-7 w-7 items-center justify-center">
+            <img src="/Aora.png" className="border-2 border-solid" />
           </div>
           <span className="text-lg font-semibold tracking-tight">Aora</span>
         </div>
@@ -81,24 +80,26 @@ export default function LandingPage() {
 
       {/* HERO */}
       {/* TODO: add a banner image as background */}
-      <section className="max-w-3xl mx-auto px-6 pt-28 pb-20 text-center">
+      <section className="mx-auto max-w-3xl px-6 pt-28 pb-20 text-center">
         <div ref={heroRef}>
-          <Badge className="mb-8 tracking-widest uppercase text-xs">
+          <Badge className="mb-8 text-xs tracking-widest uppercase">
             Task & Project Management
           </Badge>
 
-          <h1 className="text-5xl sm:text-6xl font-normal leading-tight tracking-tight mb-6">
+          <h1 className="mb-6 text-5xl leading-tight font-normal tracking-tight sm:text-6xl">
             Everything you need
             <br />
-            <em className="italic text-muted-foreground">to get things done.</em>
+            <em className="text-muted-foreground italic">
+              to get things done.
+            </em>
           </h1>
 
-          <p className="text-muted-foreground text-lg leading-relaxed max-w-md mx-auto mb-10">
+          <p className="mx-auto mb-10 max-w-md text-lg leading-relaxed text-muted-foreground">
             Aora helps you capture tasks, set deadlines, and stay focused —
             without the complexity of tools you&apos;ll never fully use.
           </p>
 
-          <div className="flex gap-3 justify-center flex-wrap">
+          <div className="flex flex-wrap justify-center gap-3">
             <Button size="lg">
               <Link href="/Auth/Register">Get started</Link>
             </Button>
@@ -109,24 +110,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <div className="max-w-3xl mx-auto px-6">
+      <div className="mx-auto max-w-3xl px-6">
         <Separator />
       </div>
 
       {/* FEATURES */}
-      <section className="max-w-3xl mx-auto px-6 py-20">
-        <p className="text-xs tracking-widest uppercase text-muted-foreground mb-10">
+      <section className="mx-auto max-w-3xl px-6 py-20">
+        <p className="mb-10 text-xs tracking-widest text-muted-foreground uppercase">
           What you get
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           {features.map((f, i) => (
             <Card key={i}>
               <CardContent className="pt-6">
-                <Separator className="w-8 mb-5" />
-                <h3 className="font-semibold text-base tracking-tight mb-2">
+                <Separator className="mb-5 w-8" />
+                <h3 className="mb-2 text-base font-semibold tracking-tight">
                   {f.title}
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {f.description}
                 </p>
               </CardContent>
@@ -135,27 +136,27 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <div className="max-w-3xl mx-auto px-6">
+      <div className="mx-auto max-w-3xl px-6">
         <Separator />
       </div>
 
       {/* HOW IT WORKS */}
-      <section className="max-w-3xl mx-auto px-6 py-20">
-        <p className="text-xs tracking-widest uppercase text-muted-foreground mb-10">
+      <section className="mx-auto max-w-3xl px-6 py-20">
+        <p className="mb-10 text-xs tracking-widest text-muted-foreground uppercase">
           How it works
         </p>
         <div className="flex flex-col gap-0">
           {steps.map((s, i) => (
             <div key={i}>
-              <div className="grid grid-cols-[60px_1fr] gap-4 items-start py-6">
-                <span className="text-xs tracking-widest text-muted-foreground pt-1">
+              <div className="grid grid-cols-[60px_1fr] items-start gap-4 py-6">
+                <span className="pt-1 text-xs tracking-widest text-muted-foreground">
                   {s.number}
                 </span>
                 <div>
-                  <h3 className="font-semibold text-base tracking-tight mb-1">
+                  <h3 className="mb-1 text-base font-semibold tracking-tight">
                     {s.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     {s.description}
                   </p>
                 </div>
@@ -167,11 +168,11 @@ export default function LandingPage() {
       </section>
 
       {/* CTA BANNER */}
-      <section className="bg-foreground text-background py-24 px-6 text-center">
-        <h2 className="text-4xl font-normal tracking-tight mb-4">
+      <section className="bg-foreground px-6 py-24 text-center text-background">
+        <h2 className="mb-4 text-4xl font-normal tracking-tight">
           Ready to get organised?
         </h2>
-        <p className="text-base leading-relaxed mb-8 opacity-60">
+        <p className="mb-8 text-base leading-relaxed opacity-60">
           Sign up in seconds. No credit card required.
         </p>
         <Button size="lg" variant="secondary">
@@ -180,9 +181,9 @@ export default function LandingPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-border px-8 py-6 flex items-center justify-between flex-wrap gap-4 bg-background">
+      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-border bg-background px-8 py-6">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-foreground text-background rounded flex items-center justify-center text-xs">
+          <div className="flex h-6 w-6 items-center justify-center rounded bg-foreground text-xs text-background">
             ✔
           </div>
           <span className="text-sm font-semibold">Aora</span>
@@ -191,7 +192,6 @@ export default function LandingPage() {
           © {new Date().getFullYear()} Aora. All rights reserved.
         </p>
       </footer>
-
     </div>
   )
 }

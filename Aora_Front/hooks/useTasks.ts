@@ -23,7 +23,7 @@ export function useTasks() {
         const data = await res.json()
         setTasks(data)
       } else {
-        setError("Failed to fetch tasks")
+        setError("Not logged in")
       }
     } catch (error) {
       setError("Could not reach the server")

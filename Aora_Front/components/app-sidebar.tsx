@@ -42,10 +42,7 @@ export function AppSidebar() {
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2 text-xl font-bold">
-          <div className="rounded bg-slate-900 p-1 text-white">✔</div>
-          <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
-            Aora
-          </span>
+          <img src="/Aora.png" className="w-[30%] border-2 border-solid" />
         </div>
       </SidebarHeader>
 
