@@ -15,8 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useUser } from "@/hooks/useUser"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
-import { useTasks } from "@/hooks/useTasks"
+import { GoTasklist } from "react-icons/go"
 
 const items = [
   { title: "Home", url: "/Dashboard", icon: Home },
@@ -27,7 +26,6 @@ const items = [
 export function AppSidebar() {
   const { user, loading } = useUser()
   const router = useRouter()
-  const { tasks } = useTasks()
 
   function profileClick(e: React.MouseEvent) {
     e.preventDefault()
@@ -69,6 +67,29 @@ export function AppSidebar() {
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Management</SidebarGroupLabel>
+          </SidebarGroup>
+          <SidebarContent>
+            <SidebarMenu className="gap-2">
+              <SidebarMenuItem>
+                <SidebarMenuButton>
+                  <a href="/Dashboard/Task">
+                    <div className="flex items-center">
+                      <GoTasklist />
+                      <div className="flex-1"></div>
+                      <span className="ml-2 transition-all duration-200 group-data-[collapsible=icon]:hidden">
+                        Task
+                      </span>
+                    </div>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarContent>
         </SidebarGroup>
 
         {/* Pushed to bottom using mt-auto */}
