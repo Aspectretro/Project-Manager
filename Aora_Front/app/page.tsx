@@ -80,6 +80,7 @@ export default function LandingPage() {
 
       {/* HERO */}
       {/* TODO: add a banner image as background */}
+      <div className="bg-zinc-100">
       <section className="mx-auto max-w-3xl px-6 pt-28 pb-20 text-center">
         <div ref={heroRef}>
           <Badge className="mb-8 text-xs tracking-widest uppercase">
@@ -109,12 +110,10 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      <div className="mx-auto max-w-3xl px-6">
-        <Separator />
       </div>
 
       {/* FEATURES */}
+      <div className="bg-taupe-100">
       <section className="mx-auto max-w-3xl px-6 py-20">
         <p className="mb-10 text-xs tracking-widest text-muted-foreground uppercase">
           What you get
@@ -135,12 +134,10 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
-
-      <div className="mx-auto max-w-3xl px-6">
-        <Separator />
       </div>
 
       {/* HOW IT WORKS */}
+      <div className="bg-gray-100">
       <section className="mx-auto max-w-3xl px-6 py-20">
         <p className="mb-10 text-xs tracking-widest text-muted-foreground uppercase">
           How it works
@@ -166,6 +163,7 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+      </div>
 
       {/* CTA BANNER */}
       <section className="bg-foreground px-6 py-24 text-center text-background">
