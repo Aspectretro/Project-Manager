@@ -143,5 +143,18 @@ def edit_task(task_id):
     
     return jsonify({"message": "Task Updated"}), 200
 
+@app.route("/tasks/<int:task_id>/resolve", methods=["DELETE"])
+def resolve_task(task_id):
+    auth_error = login_required()
+    if auth_error: return auth_error
+
+    with get_db() as conn:
+        conn.execute(
+            "DELETE FROM task WHERE task_id = ? AND user_id = ?",
+            (task_id, session["user_id"])
+        )
+    
+    return jsonify({"message": "Task Resolved"}), 200
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
