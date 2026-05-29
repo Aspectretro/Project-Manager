@@ -42,6 +42,8 @@ export default function LoginPage() {
       router.push("/Dashboard")
     } else {
       setError(data.error)
+      setEmail("")
+      setPassowrd("")
     }
   }
 
@@ -86,7 +88,13 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     value={password ?? ""}
                     onChange={(e) => setPassowrd(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handle_login()
+                      }
+                    }}
                   />
+                  {error && <p className="text-sm text-red-500">{error}</p>}
                 </div>
               </div>
             </CardContent>
