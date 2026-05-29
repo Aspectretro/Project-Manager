@@ -25,12 +25,12 @@ export default function Task() {
         <CardTitle>Tasks To Complete</CardTitle>
       </CardHeader>
       <CardContent>
-        <div>
+        <div className="flex flex-wrap">
           {loading && <p>Loading tasks...</p>}
           {error && <p className="text-red-500">{error}</p>}
           {tasks.map((task) => (
             <div key={task.task_id}>
-              <Card className="m-3 w-[30%]">
+              <Card className="m-3 w-68 h-50">
                 <CardHeader>
                   {task.title}
                   <hr />
