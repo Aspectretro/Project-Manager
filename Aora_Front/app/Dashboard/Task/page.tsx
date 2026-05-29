@@ -16,8 +16,16 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 
 export default function Task() {
-  const { tasks, loading, error } = useTasks()
+  const { tasks, loading, error, refetch } = useTasks()
   const router = useRouter()
+
+  async function handle_resolve(task_id: number) {
+    const res = await fetch(`http://localhost:5000/tasks/${task_id}/resolve`, {
+      method: "DELETE",
+      credentials: "include",
+    })
+    refetch()
+  }
 
   return (
     <Card className="min-h-[400px]">
@@ -30,7 +38,7 @@ export default function Task() {
           {error && <p className="text-red-500">{error}</p>}
           {tasks.map((task) => (
             <div key={task.task_id}>
-              <Card className="m-3 w-68 h-50">
+              <Card className="m-3 h-50 w-68">
                 <CardHeader>
                   {task.title}
                   <hr />
@@ -65,7 +73,11 @@ export default function Task() {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction>Resolve</AlertDialogAction>
+                        <AlertDialogAction
+                          onClick={() => handle_resolve(task.task_id)}
+                        >
+                          Resolve
+                        </AlertDialogAction>
                         <AlertDialogAction
                           onClick={() =>
                             router.push(
