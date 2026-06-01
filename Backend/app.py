@@ -85,6 +85,40 @@ def me():
     
     return jsonify(dict(user)), 200
 
+@app.route("/users/<int:user_id>", methods=["PATCH"])
+def edit_profile(user_id):
+    auth_error = login_required()
+    if auth_error: return auth_error
+
+    if session["user_id"] != user_id:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    data = request.get_json()
+    email = data.get("email", "").strip()
+    password = data.get("password", "").strip()
+
+    if not email and not password:
+        return jsonify({"error": "At least one field is required"}), 400
+    
+    with get_db() as conn:
+        if email:
+            try:
+                conn.execute(
+                    "UPDATE user SET email = ? WHERE user_id = ?",
+                    (email, user_id)
+                )
+            except sqlite3.IntegrityError:
+                return jsonify({"error": "Email already exists"}), 409
+        
+        if password:
+            hashed = generate_password_hash(password)
+            conn.execute(
+                "UPDATE user SET password = ? WHERE user_id = ?",
+                (hashed, user_id)
+            )
+    
+    return jsonify({"message": "Profile updated!"}), 200
+
 # Task handling
 @app.route("/event", methods=["POST"])
 def event():
