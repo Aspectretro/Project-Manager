@@ -79,7 +79,6 @@ export default function LandingPage() {
       </nav>
 
       {/* HERO */}
-      {/* TODO: add a banner image as background */}
       <div className="bg-zinc-100">
       <section className="mx-auto max-w-3xl px-6 pt-28 pb-20 text-center">
         <div ref={heroRef}>
