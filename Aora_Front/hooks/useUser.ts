@@ -3,8 +3,12 @@ import { useState, useEffect } from 'react';
 export function useUser() {
     const [user, setUser] = useState<{ user_id: number; email: string; created_at: string } | null>(null);
     const [loading, setLoading] = useState(true);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
+
+
         async function fetchUser() {
             try {
                 const res = await fetch('http://localhost:5000/me', {
@@ -26,5 +30,5 @@ export function useUser() {
         fetchUser();
     }, []);
 
-    return { user, loading };
+    return { user, loading: !mounted || loading };
 }
