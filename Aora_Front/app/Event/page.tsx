@@ -125,6 +125,8 @@ export default function Event() {
                     placeholder="Task Description"
                   />
                 </div>
+
+                {/* TODO: Add user-customizable tags */}
                 <div className="grid gap-1.5">
                   <Label htmlFor="tags">Tag</Label>
                   <Select

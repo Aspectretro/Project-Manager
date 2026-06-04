@@ -16,6 +16,8 @@ import {
 import { useUser } from "@/hooks/useUser"
 import { useRouter } from "next/navigation"
 import { GoTasklist } from "react-icons/go"
+import { IoPeople } from "react-icons/io5"
+import { AiOutlineProject } from "react-icons/ai"
 
 const items = [
   { title: "Home", url: "/Dashboard", icon: Home },
@@ -44,6 +46,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
+      {/* Main Dashboard */}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Main</SidebarGroupLabel>
@@ -69,6 +72,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Task */}
         <SidebarGroup>
           <SidebarGroup>
             <SidebarGroupLabel>Management</SidebarGroupLabel>
@@ -83,6 +87,43 @@ export function AppSidebar() {
                       <div className="flex-1"></div>
                       <span className="ml-2 transition-all duration-200 group-data-[collapsible=icon]:hidden">
                         Task
+                      </span>
+                    </div>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarContent>
+        </SidebarGroup>
+
+        {/* Collaboration */}
+        <SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Collaboration</SidebarGroupLabel>
+          </SidebarGroup>
+          <SidebarContent>
+            <SidebarMenu className="gap-2">
+              <SidebarMenuItem>
+                <SidebarMenuButton>
+                  <a href="/Dashboard/Collaboration/Project">
+                    <div className="flex items-center">
+                      <AiOutlineProject />
+                      <div className="flex-1"></div>
+                      <span className="ml-2 transition-all duration-200 group-data-[collapsible=icon]:hidden">
+                        Project
+                      </span>
+                    </div>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton>
+                  <a href="/Dashboard/Collaboration/Team">
+                    <div className="flex items-center">
+                      <IoPeople />
+                      <div className="flex-1"></div>
+                      <span className="ml-2 transition-all duration-200 group-data-[collapsible=icon]:hidden">
+                        Team
                       </span>
                     </div>
                   </a>
