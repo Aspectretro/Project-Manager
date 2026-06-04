@@ -116,19 +116,6 @@ export function AppSidebar() {
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <a href="/Dashboard/Collaboration/Team">
-                    <div className="flex items-center">
-                      <IoPeople />
-                      <div className="flex-1"></div>
-                      <span className="ml-2 transition-all duration-200 group-data-[collapsible=icon]:hidden">
-                        Team
-                      </span>
-                    </div>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
         </SidebarGroup>
