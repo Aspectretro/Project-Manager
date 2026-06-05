@@ -38,6 +38,7 @@ TODO: for future updated version, add a separate table for collaboration and tag
 -- Projects owned by a user
    CREATE TABLE IF NOT EXISTS project (
           project_id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
           name TEXT NOT NULL,
           description TEXT,
           created_by INTEGER NOT NULL,

@@ -263,12 +263,24 @@ def get_projects():
 
     with get_db() as conn:
         projects = conn.execute(
-            "SELECT project.* FROM project "
-            "JOIN project_member ON project.project_id = project_member.project_id "
-            "WHERE project_member.user_id = ?",
+            """
+            SELECT
+                project.project_id,
+                project.name,
+                project.description,
+                project.created_at,
+                user.email AS created_by_email
+            FROM project
+            JOIN project_member
+                ON project.project_id = project_member.project_id
+            JOIN user
+                ON project.created_by = user.user_id
+            WHERE project_member.user_id = ?
+            """,
             (session["user_id"],)
         ).fetchall()
 
+    print([dict(p) for p in projects])
     return jsonify([dict(p) for p in projects]), 200
 
 @app.route("/projects", methods=["POST"])
@@ -278,21 +290,22 @@ def create_project():
 
     data = request.get_json()
     name = data.get("name", "").strip()
+    description = data.get("description", "").strip()
 
     if not name:
         return jsonify({"error": "Project name is required"}), 400
     
     with get_db() as conn:
         cursor = conn.execute(
-            "INSERT INTO project (user_id, name) VALUES (?, ?)",
-            (session["user_id"], name)
+            "INSERT INTO project (user_id, name, description, created_by) VALUES (?, ?, ?, ?)",
+            (session["user_id"], name, description, session["user_id"])
         )
 
         project_id = cursor.lastrowid
         
         conn.execute(
             "INSERT INTO project_member (project_id, user_id, role) VALUES (?, ?, ?)",
-            (project_id, session["user_id"])
+            (project_id, session["user_id"], "owner")
         )
     
     return jsonify({"message": "Project Created"}), 201

@@ -98,7 +98,7 @@ export default function Project() {
             <CardContent>
               <div>{project.description}</div>
               <p className="mt-1 mb-3 text-muted-foreground">
-                Created by: {project.created_by}
+                Created by: {project.created_by_email}
               </p>
               <p className="mt-2 mb-2 tracking-wider">
                 Created at: {new Date(project.created_at).toLocaleDateString()}

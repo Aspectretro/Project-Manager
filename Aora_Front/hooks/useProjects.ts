@@ -6,6 +6,7 @@ type Project = {
   description: string
   created_by: string
   created_at: string
+  created_by_email: string
 }
 
 export function useProjects() {

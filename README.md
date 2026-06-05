@@ -16,3 +16,10 @@ Back End
 - Sqlite3
 - Flask, Flask-ocurs, Wuerkerzeug security
 
+## Dev login
+User: demo@email.com
+Password: #password
+
+## Demo login
+User: example@email.com
+Password: @1234567
