@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
 import { useRouter } from "next/navigation"
 import { useTasks } from "@/hooks/useTasks"
+import { useTags } from "@/hooks/useTag"
 import {
   Card,
   CardContent,
@@ -40,8 +41,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 export default function Event() {
+  // Calendar Component
   const router = useRouter()
   const [title, setTitle] = useState("")
   const [error, setError] = useState("")
@@ -50,6 +59,24 @@ export default function Event() {
   const [tag, setTag] = useState("")
   const [due_date, setDue_date] = useState("")
   const [date, setDate] = React.useState<Date>()
+
+  // Fetch tags for dropdown
+  const { tags, fetchTags } = useTags()
+  const [newTag, setNewTag] = useState("")
+  const [createOpen, setCreateOpen] = useState(false)
+
+  async function createTag() {
+    if (!newTag.trim()) return
+    await fetch("http://localhost:5000/tags", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ name: newTag }),
+    })
+    setNewTag("")
+    setCreateOpen(false)
+    fetchTags()
+  }
 
   const { tasks } = useTasks()
   const taskDates = tasks
@@ -129,6 +156,7 @@ export default function Event() {
                 {/* TODO: Add user-customizable tags */}
                 <div className="grid gap-1.5">
                   <Label htmlFor="tags">Tag</Label>
+
                   <Select
                     value={tag}
                     onValueChange={(value) => setTag(value ?? "")}
@@ -137,12 +165,54 @@ export default function Event() {
                       <SelectValue placeholder="Tags" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="tag1">tag 1</SelectItem>
-                      <SelectItem value="tag2">tag 2</SelectItem>
-                      <SelectItem value="tag3">tag 3</SelectItem>
+                      {tags.map((t) => (
+                        <SelectItem key={t.tag_id} value={t.name}>
+                          {t.name}
+                        </SelectItem>
+                      ))}
+                      <hr className="my-1 border-t" />
+                      <div
+                        className="flex cursor-pointer items-center justify-center p-2 text-sm text-slate-500 hover:bg-slate-100"
+                        onClick={() => setCreateOpen(true)}
+                      >
+                        + Create New Tag
+                      </div>
                     </SelectContent>
                   </Select>
                 </div>
+
+                <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New Tag</DialogTitle>
+                    </DialogHeader>
+                    <Input
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          createTag()
+                        }
+                      }}
+                    />
+                    <div className="mt-4 flex justify-end">
+                      <Button
+                        variant="outline"
+                        onClick={() => setCreateOpen(false)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            setCreateOpen(false)
+                          }
+                        }}
+                        className="mr-2"
+                      >
+                        Cancel
+                      </Button>
+                      <Button onClick={createTag}>Create</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
                 <div className="grid gap-1.5">
                   <Popover>
                     <PopoverTrigger
