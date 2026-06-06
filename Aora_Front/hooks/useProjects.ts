@@ -4,7 +4,7 @@ type Project = {
   project_id: number
   name: string
   description: string
-  created_by: string
+  created_by: number
   created_at: string
   created_by_email: string
 }
