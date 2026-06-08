@@ -55,6 +55,7 @@ TODO: for future updated version, add a separate table for collaboration and tag
           joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (project_id) REFERENCES project (project_id),
           FOREIGN KEY (user_id) REFERENCES user (user_id)
+          UNIQUE(project_id, user_id)
           );
 
 -- Links tasks to a project
@@ -66,4 +67,5 @@ TODO: for future updated version, add a separate table for collaboration and tag
           FOREIGN KEY (project_id) REFERENCES project (project_id),
           FOREIGN KEY (task_id) REFERENCES task (task_id),
           FOREIGN KEY (assigned_to) REFERENCES user (user_id)
+          UNIQUE(project_id, task_id)
           );

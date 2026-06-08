@@ -13,7 +13,7 @@ def get_db():
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
-# Authentication
+# Authentication Helper
 def login_required():
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
@@ -21,8 +21,7 @@ def login_required():
 
 @app.route("/register", methods=["POST"])
 def register():
-    data = request.get_json()
-
+    data = request.get_json() or {}
     email = data.get("email", "").strip()
     password = data.get("password", "").strip()
 
@@ -38,14 +37,12 @@ def register():
                 (email, hashed)
             )
         return jsonify({"message": "Account created!"}), 201
-    
     except sqlite3.IntegrityError:
         return jsonify({"error": "Email already exists"}), 409
     
 @app.route("/login", methods=["POST"])
 def login():
-    data = request.get_json()
-
+    data = request.get_json() or {}
     email = data.get("email", "").strip()
     password = data.get("password", "").strip()
 
@@ -71,8 +68,7 @@ def logout():
 @app.route("/me", methods=["GET"])
 def me():
     auth_error = login_required()
-    if auth_error:
-        return auth_error
+    if auth_error: return auth_error
     
     with get_db() as conn:
         user = conn.execute(
@@ -93,7 +89,7 @@ def edit_profile(user_id):
     if session["user_id"] != user_id:
         return jsonify({"error": "Unauthorized"}), 403
 
-    data = request.get_json()
+    data = request.get_json() or {}
     email = data.get("email", "").strip()
     password = data.get("password", "").strip()
 
@@ -125,20 +121,18 @@ def event():
     auth_error = login_required()
     if auth_error: return auth_error
 
-    data = request.get_json()
+    data = request.get_json() or {}
     title = data.get("title", "").strip()
     content = data.get("content", "").strip()
     tag = data.get("tag", "")
     due_date = data.get("due_date")
-
 
     if not title:
         return jsonify({"error": "A title is required"}), 400
     
     with get_db() as conn:
         conn.execute(
-            "INSERT INTO task (user_id, title, content, tag, due_date) "
-            "VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO task (user_id, title, content, tag, due_date) VALUES (?, ?, ?, ?, ?)",
             (session["user_id"], title, content, tag, due_date)
         )
     
@@ -162,7 +156,7 @@ def edit_task(task_id):
     auth_error = login_required()
     if auth_error: return auth_error
 
-    data = request.get_json()
+    data = request.get_json() or {}
     title = data.get("title", "").strip()
     content = data.get("content", "").strip()
     tag = data.get("tag", "")
@@ -170,8 +164,7 @@ def edit_task(task_id):
 
     with get_db() as conn:
         conn.execute(
-            "UPDATE task SET title = ?, content = ?, tag = ?, due_date = ? "
-            "WHERE task_id = ? AND user_id = ?",
+            "UPDATE task SET title = ?, content = ?, tag = ?, due_date = ? WHERE task_id = ? AND user_id = ?",
             (title, content, tag, due_date, task_id, session["user_id"])
         )
     
@@ -198,7 +191,7 @@ def get_tags():
 
     with get_db() as conn:
         tags = conn.execute(
-            "SELECT * FROM tag WHERE user_id =?",
+            "SELECT * FROM tag WHERE user_id = ?",
             (session["user_id"],)
         ).fetchall()
 
@@ -209,7 +202,7 @@ def create_tag():
     auth_error = login_required()
     if auth_error: return auth_error
 
-    data = request.get_json()
+    data = request.get_json() or {}
     name = data.get("name", "").strip()
 
     if not name:
@@ -228,7 +221,7 @@ def edit_tag(tag_id):
     auth_error = login_required()
     if auth_error: return auth_error
 
-    data = request.get_json()
+    data = request.get_json() or {}
     name = data.get("name", "").strip()
 
     if not name:
@@ -264,23 +257,20 @@ def get_projects():
     with get_db() as conn:
         projects = conn.execute(
             """
-            SELECT
+            SELECT DISTINCT
                 project.project_id,
                 project.name,
                 project.description,
                 project.created_at,
                 user.email AS created_by_email
             FROM project
-            JOIN project_member
-                ON project.project_id = project_member.project_id
-            JOIN user
-                ON project.created_by = user.user_id
+            JOIN project_member ON project.project_id = project_member.project_id
+            JOIN user ON project.created_by = user.user_id
             WHERE project_member.user_id = ?
             """,
             (session["user_id"],)
         ).fetchall()
 
-    print([dict(p) for p in projects])
     return jsonify([dict(p) for p in projects]), 200
 
 @app.route("/projects", methods=["POST"])
@@ -288,7 +278,7 @@ def create_project():
     auth_error = login_required()
     if auth_error: return auth_error
 
-    data = request.get_json()
+    data = request.get_json() or {}
     name = data.get("name", "").strip()
     description = data.get("description", "").strip()
 
@@ -300,7 +290,6 @@ def create_project():
             "INSERT INTO project (user_id, name, description, created_by) VALUES (?, ?, ?, ?)",
             (session["user_id"], name, description, session["user_id"])
         )
-
         project_id = cursor.lastrowid
         
         conn.execute(
@@ -315,33 +304,33 @@ def add_project_member(project_id):
     auth_error = login_required()
     if auth_error: return auth_error
 
-    data = request.get_json()
+    data = request.get_json() or {}
     email = data.get("email", "").strip()
 
     with get_db() as conn:
-        # Check if requester is owner
         owner = conn.execute(
             "SELECT * FROM project_member WHERE project_id = ? AND user_id = ? AND role = 'owner'",
             (project_id, session["user_id"])
         ).fetchone()
 
         if not owner:
-            return jsonify({"error": "Unauthorized"}), 403
+            return jsonify({"error": "Unauthorized. Only owners can add members."}), 403
 
-        # Find user by email
         user = conn.execute(
             "SELECT user_id FROM user WHERE email = ?", (email,)
         ).fetchone()
 
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"error": "User with this email does not exist."}), 404
 
-        conn.execute(
-            "INSERT INTO project_member (project_id, user_id, role) VALUES (?, ?, ?)",
-            (project_id, user["user_id"], "member")
-        )
-
-    return jsonify({"message": "Member added"}), 201
+        try:
+            conn.execute(
+                "INSERT INTO project_member (project_id, user_id, role) VALUES (?, ?, ?)",
+                (project_id, user["user_id"], "member")
+            )
+            return jsonify({"message": "Member added successfully"}), 201
+        except sqlite3.IntegrityError:
+            return jsonify({"error": "This user is already a member of this project."}), 409
 
 @app.route("/projects/<int:project_id>/members/<int:user_id>", methods=["DELETE"])
 def remove_project_member(project_id, user_id):
@@ -369,17 +358,20 @@ def assign_task(project_id):
     auth_error = login_required()
     if auth_error: return auth_error
 
-    data = request.get_json()
+    data = request.get_json() or {}
     task_id = data.get("task_id")
     assigned_to = data.get("assigned_to")
 
     with get_db() as conn:
-        conn.execute(
-            "INSERT INTO project_task (project_id, task_id, assigned_to) VALUES (?, ?, ?)",
-            (project_id, task_id, assigned_to)
-        )
-
-    return jsonify({"message": "Task assigned"}), 201
+        try:
+            conn.execute(
+                "INSERT INTO project_task (project_id, task_id, assigned_to) VALUES (?, ?, ?)"
+                "ON CONFLICT(project_id, task_id) DO UPDATE SET assigned_to=excluded.assigned_to",
+                (project_id, task_id, assigned_to)
+            )
+            return jsonify({"message": "Task assigned"}), 201
+        except sqlite3.IntegrityError:
+            return jsonify({"error": "Failed to assign task. Verification failed."}), 400
 
 @app.route("/projects/<int:project_id>/tasks", methods=["GET"])
 def get_project_tasks(project_id):
@@ -395,6 +387,47 @@ def get_project_tasks(project_id):
         ).fetchall()
 
     return jsonify([dict(t) for t in tasks]), 200
+
+# NEW ROUTE: Fixes Frontend handle_remove_task Error 404
+@app.route("/projects/<int:project_id>/tasks/<int:task_id>", methods=["DELETE"])
+def remove_task_from_project(project_id, task_id):
+    auth_error = login_required()
+    if auth_error: return auth_error
+
+    with get_db() as conn:
+        member = conn.execute(
+            "SELECT 1 FROM project_member WHERE project_id = ? AND user_id = ?",
+            (project_id, session["user_id"])
+        ).fetchone()
+        
+        if not member:
+            return jsonify({"error": "Unauthorized"}), 403
+
+        conn.execute(
+            "DELETE FROM project_task WHERE project_id = ? AND task_id = ?",
+            (project_id, task_id)
+        )
+
+    return jsonify({"message": "Task removed from project"}), 200
+
+@app.route("/projects/<int:project_id>/members", methods=["GET"])
+def get_project_members(project_id):
+    auth_error = login_required()
+    if auth_error: return auth_error
+
+    with get_db() as conn:
+        members = conn.execute(
+            """
+            SELECT user.user_id, user.email, project_member.role 
+            FROM project_member
+            JOIN user ON project_member.user_id = user.user_id
+            WHERE project_member.project_id = ?
+            """,
+            (project_id,)
+        ).fetchall()
+
+    return jsonify([dict(m) for m in members]), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
