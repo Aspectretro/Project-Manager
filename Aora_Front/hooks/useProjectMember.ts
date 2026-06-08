@@ -13,10 +13,14 @@ export function useProjectMember(projectId: number) {
 
     async function fetchMembers() {
         try {
-            const res = await fetch(`/http://localhost:5000/projects/${projectId}/members`)
+            // FIXED: Removed the leading "/" absolute router character bug
+            const res = await fetch(`http://localhost:5000/projects/${projectId}/members`, {
+                credentials: "include"
+            });
+            
             if (res.ok) {
                 const data = await res.json();
-                setMembers(data.members);
+                setMembers(Array.isArray(data) ? data : data.members || []);
             } else {
                 setError('Failed to fetch members');
             }

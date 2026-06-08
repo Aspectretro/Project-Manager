@@ -344,7 +344,7 @@ def remove_project_member(project_id, user_id):
         ).fetchone()
 
         if not owner:
-            return jsonify({"error": "Unauthorized"}), 403
+            return jsonify({"error": "Unauthorized. Only owners can remove members."}), 403
 
         conn.execute(
             "DELETE FROM project_member WHERE project_id = ? AND user_id = ?",
@@ -353,6 +353,7 @@ def remove_project_member(project_id, user_id):
 
     return jsonify({"message": "Member removed"}), 200
 
+# CHANGED: Added access validation logic to verify caller belongs to project
 @app.route("/projects/<int:project_id>/tasks", methods=["POST"])
 def assign_task(project_id):
     auth_error = login_required()
@@ -363,6 +364,15 @@ def assign_task(project_id):
     assigned_to = data.get("assigned_to")
 
     with get_db() as conn:
+        # Verify caller belongs to project (Member or Owner can assign)
+        member = conn.execute(
+            "SELECT 1 FROM project_member WHERE project_id = ? AND user_id = ?",
+            (project_id, session["user_id"])
+        ).fetchone()
+        
+        if not member:
+            return jsonify({"error": "Unauthorized. You are not a member of this project."}), 403
+
         try:
             conn.execute(
                 "INSERT INTO project_task (project_id, task_id, assigned_to) VALUES (?, ?, ?)"
@@ -373,12 +383,21 @@ def assign_task(project_id):
         except sqlite3.IntegrityError:
             return jsonify({"error": "Failed to assign task. Verification failed."}), 400
 
+# CHANGED: Added security lookup to ensure non-members cannot read private tasks
 @app.route("/projects/<int:project_id>/tasks", methods=["GET"])
 def get_project_tasks(project_id):
     auth_error = login_required()
     if auth_error: return auth_error
 
     with get_db() as conn:
+        member = conn.execute(
+            "SELECT 1 FROM project_member WHERE project_id = ? AND user_id = ?",
+            (project_id, session["user_id"])
+        ).fetchone()
+        
+        if not member:
+            return jsonify({"error": "Unauthorized. You cannot view this project's tasks."}), 403
+
         tasks = conn.execute(
             "SELECT task.*, project_task.assigned_to FROM task "
             "JOIN project_task ON task.task_id = project_task.task_id "
@@ -388,7 +407,6 @@ def get_project_tasks(project_id):
 
     return jsonify([dict(t) for t in tasks]), 200
 
-# NEW ROUTE: Fixes Frontend handle_remove_task Error 404
 @app.route("/projects/<int:project_id>/tasks/<int:task_id>", methods=["DELETE"])
 def remove_task_from_project(project_id, task_id):
     auth_error = login_required()
@@ -410,12 +428,21 @@ def remove_task_from_project(project_id, task_id):
 
     return jsonify({"message": "Task removed from project"}), 200
 
+# CHANGED: Added validation logic to verify caller can read member database lists
 @app.route("/projects/<int:project_id>/members", methods=["GET"])
 def get_project_members(project_id):
     auth_error = login_required()
     if auth_error: return auth_error
 
     with get_db() as conn:
+        member = conn.execute(
+            "SELECT 1 FROM project_member WHERE project_id = ? AND user_id = ?",
+            (project_id, session["user_id"])
+        ).fetchone()
+        
+        if not member:
+            return jsonify({"error": "Unauthorized"}), 403
+
         members = conn.execute(
             """
             SELECT user.user_id, user.email, project_member.role 

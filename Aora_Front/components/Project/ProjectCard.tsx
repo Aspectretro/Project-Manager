@@ -28,6 +28,7 @@ import { useProjectMember } from "@/hooks/useProjectMember"
 import { useProjectTasks } from "@/hooks/useProjectTasks"
 import { useTasks } from "@/hooks/useTasks"
 import { useState } from "react"
+import { useUser } from "@/hooks/useUser"
 
 export type ProjectType = {
   project_id: number
@@ -48,9 +49,15 @@ type Task = {
 }
 
 export default function ProjectCard({ project }: { project: ProjectType }) {
-  const { members = [], refetch: refetchMembers } = useProjectMember(project.project_id)
-  const { projectTasks = [], refetch: refetchProjectTasks } = useProjectTasks(project.project_id)
+
+  const { members = [], refetch: refetchMembers } = useProjectMember(
+    project.project_id
+  )
+  const { projectTasks = [], refetch: refetchProjectTasks } = useProjectTasks(
+    project.project_id
+  )
   const { tasks = [] } = useTasks()
+  const { user } = useUser()
 
   const [memberOpen, setMemberOpen] = useState(false)
   const [viewMembersOpen, setViewMembersOpen] = useState(false)
@@ -61,6 +68,15 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
   const [selectedTaskId, setSelectedTaskId] = useState<string>("")
   const [selectedTaskTitle, setSelectedTaskTitle] = useState<string>("")
   const [assignedTo, setAssignedTo] = useState<string>("")
+
+  // FIXED AUTHORIZATION EVALUATION
+  // 1. Find the membership row matching the currently logged-in browser session user
+  const currentUserMembership = members.find(
+    (m) => m.email?.toLowerCase() === user?.email?.toLowerCase()
+  )
+
+  // 2. Grant access ONLY if their mapped membership role is explicitly "owner"
+  const isOwner = currentUserMembership?.role === "owner"
 
   async function handle_add_member() {
     if (!email.trim()) return
@@ -118,16 +134,16 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
 
   return (
     <Card className="m-3 w-72">
-      <CardHeader className="font-bold text-lg">
+      <CardHeader className="text-lg font-bold">
         {project.name}
         <hr className="mt-2" />
       </CardHeader>
       <CardContent>
-        <div className="text-sm mb-2">{project.description}</div>
+        <div className="mb-2 text-sm">{project.description}</div>
         <p className="text-xs text-muted-foreground">
           Created by: {project.created_by_email}
         </p>
-        <p className="text-xs tracking-wider mt-1 mb-2">
+        <p className="mt-1 mb-2 text-xs tracking-wider">
           Created at: {new Date(project.created_at).toLocaleDateString()}
         </p>
         <p className="mb-4 text-sm font-medium text-muted-foreground">
@@ -146,8 +162,7 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
 
           {/* Project Tasks Dialog */}
           <AlertDialog>
-            {/* Base UI Triggers wrap text or styles directly, rather than cloning node elements via asChild */}
-            <AlertDialogTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-9 px-3">
+            <AlertDialogTrigger className="inline-flex h-9 items-center justify-center rounded-md border border-input px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
               Project Tasks
             </AlertDialogTrigger>
             <AlertDialogContent className="sm:max-w-2xl">
@@ -156,13 +171,17 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
               </AlertDialogHeader>
 
               <div className="flex flex-col gap-3">
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Add Task to Project</Label>
+                <Label className="text-xs tracking-wider text-muted-foreground uppercase">
+                  Add Task to Project
+                </Label>
                 <div className="flex gap-2">
                   <Select
                     value={selectedTaskId}
                     onValueChange={(value) => {
                       setSelectedTaskId(value || "")
-                      const found = tasks.find((t) => String(t.task_id) === value)
+                      const found = tasks.find(
+                        (t) => String(t.task_id) === value
+                      )
                       setSelectedTaskTitle(found ? found.title : "")
                     }}
                   >
@@ -182,13 +201,21 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
                   <Button onClick={handle_assign_task}>Add</Button>
                 </div>
 
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Assign To (optional)</Label>
+                <Label className="text-xs tracking-wider text-muted-foreground uppercase">
+                  Assign To (optional)
+                </Label>
+
                 <Select
                   value={assignedTo}
                   onValueChange={(value) => setAssignedTo(value || "")}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a member..." />
+                    <SelectValue placeholder="Select a member...">
+                      {assignedTo
+                        ? members.find((m) => String(m.user_id) === assignedTo)
+                            ?.email
+                        : "Select a member..."}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {members.map((m) => (
@@ -200,9 +227,11 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
                 </Select>
               </div>
 
-              <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
+              <div className="mt-4 max-h-60 space-y-2 overflow-y-auto">
                 {projectTasks.length === 0 && (
-                  <p className="text-sm text-muted-foreground py-2">No tasks yet</p>
+                  <p className="py-2 text-sm text-muted-foreground">
+                    No tasks yet
+                  </p>
                 )}
                 {projectTasks.map((t) => (
                   <div
@@ -211,7 +240,9 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
                   >
                     <div>
                       <p className="text-sm font-medium">{t.title}</p>
-                      <p className="text-xs text-muted-foreground">{t.due_date || "No due date"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t.due_date || "No due date"}
+                      </p>
                     </div>
                     <div className="flex gap-2">
                       <Button
@@ -236,22 +267,24 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
                 ))}
               </div>
 
-              <div className="flex justify-end mt-4">
-                <AlertDialogCancel className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-9 px-3">
+              <div className="mt-4 flex justify-end">
+                <AlertDialogCancel className="inline-flex h-9 items-center justify-center rounded-md border border-input px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
                   Close
                 </AlertDialogCancel>
               </div>
             </AlertDialogContent>
           </AlertDialog>
 
-          {/* Manage Members Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setMemberOpen(true)}
-          >
-            Manage Members
-          </Button>
+          {/* Corrected logic layout block */}
+          {isOwner && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMemberOpen(true)}
+            >
+              Manage Members
+            </Button>
+          )}
         </div>
 
         {/* View Task Dialog */}
@@ -262,22 +295,31 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
             </DialogHeader>
             <div className="flex flex-col gap-3">
               <div>
-                <p className="text-xs text-muted-foreground">Task Description</p>
-                <p className="text-sm font-medium">{viewTask?.content || "No content provided."}</p>
+                <p className="text-xs text-muted-foreground">
+                  Task Description
+                </p>
+                <p className="text-sm font-medium">
+                  {viewTask?.content || "No content provided."}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Tag</p>
-                <p className="text-sm font-medium">{viewTask?.tag ?? "No tag"}</p>
+                <p className="text-sm font-medium">
+                  {viewTask?.tag ?? "No tag"}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Due Date</p>
-                <p className="text-sm font-medium">{viewTask?.due_date ?? "No due date"}</p>
+                <p className="text-sm font-medium">
+                  {viewTask?.due_date ?? "No due date"}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Assigned To</p>
                 <p className="text-sm font-medium">
                   {viewTask?.assigned_to
-                    ? members.find((m) => m.user_id === viewTask.assigned_to)?.email ?? "Unknown User"
+                    ? (members.find((m) => m.user_id === viewTask.assigned_to)
+                        ?.email ?? "Unknown User")
                     : "Unassigned"}
                 </p>
               </div>
@@ -296,7 +338,7 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
             <DialogHeader>
               <DialogTitle>Members — {project.name}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
+            <div className="max-h-60 space-y-2 overflow-y-auto">
               {members.length === 0 && (
                 <p className="text-sm text-muted-foreground">No members yet</p>
               )}
@@ -307,13 +349,18 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
                 >
                   <div>
                     <p className="text-sm font-medium">{m.email}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{m.role}</p>
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {m.role}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
             <div className="mt-4 flex justify-end">
-              <Button variant="outline" onClick={() => setViewMembersOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setViewMembersOpen(false)}
+              >
                 Close
               </Button>
             </div>
@@ -338,14 +385,19 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
               <Button onClick={handle_add_member}>Add</Button>
             </div>
             {memberError && (
-              <p className="text-sm text-red-500 font-medium">{memberError}</p>
+              <p className="text-sm font-medium text-red-500">{memberError}</p>
             )}
-            <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
+            <div className="mt-4 max-h-60 space-y-2 overflow-y-auto">
               {members.map((m) => (
-                <div key={m.user_id} className="flex items-center justify-between border-b pb-2 last:border-none">
+                <div
+                  key={m.user_id}
+                  className="flex items-center justify-between border-b pb-2 last:border-none"
+                >
                   <div>
                     <p className="text-sm font-medium">{m.email}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{m.role}</p>
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {m.role}
+                    </p>
                   </div>
                   {m.role !== "owner" && (
                     <Button
