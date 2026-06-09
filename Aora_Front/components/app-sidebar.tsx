@@ -21,8 +21,8 @@ import { AiOutlineProject } from "react-icons/ai"
 
 const items = [
   { title: "Home", url: "/Dashboard", icon: Home },
-  { title: "Inbox", url: "#", icon: Inbox },
-  { title: "Calendar", url: "#", icon: Calendar },
+  { title: "Inbox", url: "/Dashboard/Inbox", icon: Inbox },
+  { title: "Calendar", url: "/Dashboard/Calendar", icon: Calendar },
 ]
 
 export function AppSidebar() {
