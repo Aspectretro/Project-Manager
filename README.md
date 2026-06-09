@@ -3,6 +3,7 @@ Aora is a Next.js application that allow organisers to have a rather organised o
 
 The application offers secured login, with all password being hashed on registeration, meanwhile within each project, there are also two level of authorisation (currently) to ensure that the team hiearchy won't be breached and the members within a project won't have to much power of manipulation. Roles are detailed below:
 |Roles | Actions Available |
+|------|-------------------|
 |Owner | Member management (addition and removal), project-related task management (addition and removal) |
 |Member | Project-related task management (addition and removal) |
 
