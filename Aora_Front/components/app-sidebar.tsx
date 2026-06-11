@@ -16,7 +16,6 @@ import {
 import { useUser } from "@/hooks/useUser"
 import { useRouter } from "next/navigation"
 import { GoTasklist } from "react-icons/go"
-import { IoPeople } from "react-icons/io5"
 import { AiOutlineProject } from "react-icons/ai"
 
 const items = [
@@ -54,18 +53,15 @@ export function AppSidebar() {
             <SidebarMenu className="gap-2">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <a href={item.url}>
-                    <SidebarMenuButton tooltip={item.title}>
-                      <div className="flex items-center">
-                        <div className="flex-1">
-                          <item.icon />
-                        </div>
-                        <span className="ml-2 transition-all duration-200 group-data-[collapsible=icon]:hidden">
-                          {item.title}
-                        </span>
-                      </div>
-                    </SidebarMenuButton>
-                  </a>
+                  <SidebarMenuButton
+                    render={<a href={item.url} />}
+                    tooltip={item.title}
+                  >
+                    <item.icon />
+                    <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
+                      {item.title}
+                    </span>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -74,22 +70,15 @@ export function AppSidebar() {
 
         {/* Task */}
         <SidebarGroup>
-          <SidebarGroup>
-            <SidebarGroupLabel>Management</SidebarGroupLabel>
-          </SidebarGroup>
+          <SidebarGroupLabel>Management</SidebarGroupLabel>
           <SidebarContent>
             <SidebarMenu className="gap-2">
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <a href="/Dashboard/Task">
-                    <div className="flex items-center">
-                      <GoTasklist />
-                      <div className="flex-1"></div>
-                      <span className="ml-2 transition-all duration-200 group-data-[collapsible=icon]:hidden">
-                        Task
-                      </span>
-                    </div>
-                  </a>
+                <SidebarMenuButton render={<a href="/Dashboard/Task" />}>
+                  <GoTasklist />
+                  <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
+                    Task
+                  </span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -98,22 +87,17 @@ export function AppSidebar() {
 
         {/* Collaboration */}
         <SidebarGroup>
-          <SidebarGroup>
-            <SidebarGroupLabel>Collaboration</SidebarGroupLabel>
-          </SidebarGroup>
+          <SidebarGroupLabel>Collaboration</SidebarGroupLabel>
           <SidebarContent>
             <SidebarMenu className="gap-2">
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <a href="/Dashboard/Collaboration/Project">
-                    <div className="flex items-center">
-                      <AiOutlineProject />
-                      <div className="flex-1"></div>
-                      <span className="ml-2 transition-all duration-200 group-data-[collapsible=icon]:hidden">
-                        Project
-                      </span>
-                    </div>
-                  </a>
+                <SidebarMenuButton
+                  render={<a href="/Dashboard/Collaboration/Project" />}
+                >
+                  <AiOutlineProject />
+                  <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
+                    Project
+                  </span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -124,13 +108,11 @@ export function AppSidebar() {
         <SidebarGroup className="mt-auto">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <a href="/Dashboard/Setting">
-                  <Settings />
-                  <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
-                    Settings
-                  </span>
-                </a>
+              <SidebarMenuButton render={<a href="/Dashboard/Setting" />}>
+                <Settings />
+                <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
+                  Settings
+                </span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -138,17 +120,14 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenuButton className="w-full">
-          <a
-            href="/Dashboard/Profile"
-            onClick={profileClick}
-            className="flex w-full items-center gap-2"
-          >
-            <User className="h-4 w-4" />
-            <span className="truncate text-xs font-medium transition-all duration-200 group-data-[collapsible=icon]:hidden">
-              {loading ? "Loading..." : user ? user.email : "Not logged in"}
-            </span>
-          </a>
+        <SidebarMenuButton
+          render={<a href="/Dashboard/Profile" onClick={profileClick} />}
+          className="w-full"
+        >
+          <User className="h-4 w-4" />
+          <span className="truncate text-xs font-medium transition-all duration-200 group-data-[collapsible=icon]:hidden">
+            {loading ? "Loading..." : user ? user.email : "Not logged in"}
+          </span>
         </SidebarMenuButton>
       </SidebarFooter>
     </Sidebar>
