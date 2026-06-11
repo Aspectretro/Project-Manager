@@ -7,6 +7,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -20,8 +30,9 @@ import { Label } from "@/components/ui/label"
 import { useProjectMember } from "@/hooks/useProjectMember"
 import { useProjectTasks } from "@/hooks/useProjectTasks"
 import { useTasks } from "@/hooks/useTasks"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useUser } from "@/hooks/useUser"
+import { Trash2, Eye, Lock } from "lucide-react"
 
 export type ProjectType = {
   project_id: number
@@ -41,7 +52,13 @@ type Task = {
   assigned_to: number | null
 }
 
-export default function ProjectCard({ project }: { project: ProjectType }) {
+export default function ProjectCard({ 
+  project, 
+  onProjectDeleted 
+}: { 
+  project: ProjectType
+  onProjectDeleted?: () => void 
+}) {
 
   const { members = [], refetch: refetchMembers } = useProjectMember(
     project.project_id
@@ -60,12 +77,20 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
   const [selectedTaskId, setSelectedTaskId] = useState<string>("")
   const [selectedTaskTitle, setSelectedTaskTitle] = useState<string>("")
   const [assignedTo, setAssignedTo] = useState<string>("")
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // FIXED AUTHORIZATION EVALUATION
   const currentUserMembership = members.find(
     (m) => m.email?.toLowerCase() === user?.email?.toLowerCase()
   )
   const isOwner = currentUserMembership?.role === "owner"
+  const isMember = !!currentUserMembership
 
   async function handle_add_member() {
     if (!email.trim()) return
@@ -121,9 +146,56 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
     refetchProjectTasks()
   }
 
+  async function handle_delete_project() {
+    setIsDeleting(true)
+    try {
+      const res = await fetch(
+        `http://localhost:5000/projects/${project.project_id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      )
+      
+      if (res.ok) {
+        setDeleteDialogOpen(false)
+        setProjectDialogOpen(false)
+        if (onProjectDeleted) {
+          onProjectDeleted()
+        }
+      } else {
+        const error = await res.json()
+        console.error("Failed to delete project:", error)
+        alert(error.error || "Failed to delete project")
+      }
+    } catch (error) {
+      console.error("Error deleting project:", error)
+      alert("An error occurred while deleting the project")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    if (!mounted) return ""
+    return new Date(dateString).toLocaleDateString()
+  }
+
   return (
-    <Card className="m-3 w-72">
-      <CardHeader className="text-lg font-bold">
+    <Card className="m-3 w-72 relative">
+      {/* Delete button only for owners */}
+      {isOwner && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2 right-2 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+          onClick={() => setDeleteDialogOpen(true)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
+      
+      <CardHeader className="text-lg font-bold pr-8">
         {project.name}
         <hr className="mt-2" />
       </CardHeader>
@@ -132,23 +204,25 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
         <p className="text-xs text-muted-foreground">
           Created by: {project.created_by_email}
         </p>
-        <p className="mt-1 mb-2 text-xs tracking-wider">
-          Created at: {new Date(project.created_at).toLocaleDateString()}
+        <p className="mt-1 mb-2 text-xs tracking-wider" suppressHydrationWarning>
+          Created at: {mounted ? new Date(project.created_at).toLocaleDateString() : ""}
         </p>
         <p className="mb-4 text-sm font-medium text-muted-foreground">
           Members: {members.length}
         </p>
 
         <div className="flex flex-col gap-2">
-          {/* View Project Details Button */}
+          {/* View Project Details Button - Available to all members */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => setProjectDialogOpen(true)}
           >
+            <Eye className="h-4 w-4 mr-2" />
             View Project Details
           </Button>
 
+          {/* Manage Project Button - Only for owners */}
           {isOwner && (
             <Button
               variant="outline"
@@ -160,11 +234,32 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
           )}
         </div>
 
-        {/* Main Project Dialog with Sidebar Layout */}
+        {/* Main Project Dialog with conditional editing based on role */}
         <Dialog open={projectDialogOpen} onOpenChange={setProjectDialogOpen}>
           <DialogContent className="sm:max-w-[900px] max-h-[85vh] overflow-hidden flex flex-col">
             <DialogHeader>
-              <DialogTitle className="text-2xl">{project.name}</DialogTitle>
+              <div className="flex items-center justify-between pr-8">
+                <DialogTitle className="text-2xl">{project.name}</DialogTitle>
+                {!isOwner && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                    <Lock className="h-3 w-3" />
+                    View Only Mode
+                  </div>
+                )}
+                {isOwner && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      setProjectDialogOpen(false)
+                      setDeleteDialogOpen(true)
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Project
+                  </Button>
+                )}
+              </div>
             </DialogHeader>
 
             <div className="flex flex-1 overflow-hidden gap-6">
@@ -178,7 +273,9 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
                   </p>
                   <div className="mt-3 text-xs text-muted-foreground">
                     <p>Created by: {project.created_by_email}</p>
-                    <p>Created at: {new Date(project.created_at).toLocaleDateString()}</p>
+                    <p suppressHydrationWarning>
+                      Created at: {mounted ? new Date(project.created_at).toLocaleDateString() : ""}
+                    </p>
                   </div>
                 </div>
 
@@ -188,62 +285,64 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
                     <h3 className="font-semibold text-lg">Tasks</h3>
                   </div>
 
-                  {/* Add Task Form */}
-                  <div className="flex flex-col gap-3 p-3 border rounded-lg">
-                    <Label className="text-xs tracking-wider text-muted-foreground uppercase">
-                      Add Task to Project
-                    </Label>
-                    <div className="flex gap-2">
+                  {/* Add Task Form - Only for owners */}
+                  {isOwner && (
+                    <div className="flex flex-col gap-3 p-3 border rounded-lg">
+                      <Label className="text-xs tracking-wider text-muted-foreground uppercase">
+                        Add Task to Project
+                      </Label>
+                      <div className="flex gap-2">
+                        <Select
+                          value={selectedTaskId}
+                          onValueChange={(value) => {
+                            setSelectedTaskId(value || "")
+                            const found = tasks.find(
+                              (t) => String(t.task_id) === value
+                            )
+                            setSelectedTaskTitle(found ? found.title : "")
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select a task...">
+                              {selectedTaskTitle || "Select a task..."}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {tasks.map((t) => (
+                              <SelectItem key={t.task_id} value={String(t.task_id)}>
+                                {t.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button onClick={handle_assign_task}>Add</Button>
+                      </div>
+
+                      <Label className="text-xs tracking-wider text-muted-foreground uppercase">
+                        Assign To (optional)
+                      </Label>
                       <Select
-                        value={selectedTaskId}
-                        onValueChange={(value) => {
-                          setSelectedTaskId(value || "")
-                          const found = tasks.find(
-                            (t) => String(t.task_id) === value
-                          )
-                          setSelectedTaskTitle(found ? found.title : "")
-                        }}
+                        value={assignedTo}
+                        onValueChange={(value) => setAssignedTo(value || "")}
                       >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a task...">
-                            {selectedTaskTitle || "Select a task..."}
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a member...">
+                            {assignedTo
+                              ? members.find((m) => String(m.user_id) === assignedTo)
+                                  ?.email
+                              : "Select a member..."}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          {tasks.map((t) => (
-                            <SelectItem key={t.task_id} value={String(t.task_id)}>
-                              {t.title}
+                          {members.map((m) => (
+                            <SelectItem key={m.user_id} value={String(m.user_id)}>
+                              {m.email}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <Button onClick={handle_assign_task}>Add</Button>
                     </div>
-
-                    <Label className="text-xs tracking-wider text-muted-foreground uppercase">
-                      Assign To (optional)
-                    </Label>
-                    <Select
-                      value={assignedTo}
-                      onValueChange={(value) => setAssignedTo(value || "")}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a member...">
-                          {assignedTo
-                            ? members.find((m) => String(m.user_id) === assignedTo)
-                                ?.email
-                            : "Select a member..."}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {members.map((m) => (
-                          <SelectItem key={m.user_id} value={String(m.user_id)}>
-                            {m.email}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  )}
 
                   {/* Tasks List */}
                   <div className="space-y-2 max-h-[400px] overflow-y-auto">
@@ -281,13 +380,16 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
                           >
                             View
                           </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handle_remove_task(t.task_id)}
-                          >
-                            Remove
-                          </Button>
+                          {/* Remove button - Only for owners */}
+                          {isOwner && (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handle_remove_task(t.task_id)}
+                            >
+                              Remove
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -348,6 +450,7 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
                           {m.role}
                         </p>
                       </div>
+                      {/* Remove button - Only for owners and not removing themselves */}
                       {isOwner && m.role !== "owner" && (
                         <Button
                           variant="ghost"
@@ -364,7 +467,21 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
               </div>
             </div>
 
-            <div className="mt-4 flex justify-end pt-4 border-t">
+            <div className="mt-4 flex justify-between pt-4 border-t">
+              <div>
+                {isOwner && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      setProjectDialogOpen(false)
+                      setDeleteDialogOpen(true)
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Project
+                  </Button>
+                )}
+              </div>
               <Button variant="outline" onClick={() => setProjectDialogOpen(false)}>
                 Close
               </Button>
@@ -414,6 +531,29 @@ export default function ProjectCard({ project }: { project: ProjectType }) {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Project Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the project
+                &quot;{project.name}&quot; and remove all associated data.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handle_delete_project}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? "Deleting..." : "Delete Project"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   )

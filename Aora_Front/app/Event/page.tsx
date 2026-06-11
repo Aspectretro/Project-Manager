@@ -29,28 +29,20 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 
 export default function Event() {
-  // Calendar Component
   const router = useRouter()
   const [title, setTitle] = useState("")
   const [error, setError] = useState("")
@@ -58,7 +50,7 @@ export default function Event() {
   const [content, setContent] = useState("")
   const [tag, setTag] = useState("")
   const [due_date, setDue_date] = useState("")
-  const [date, setDate] = React.useState<Date>()
+  const [selectedDate, setSelectedDate] = React.useState<Date>()
 
   // Fetch tags for dropdown
   const { tags, fetchTags } = useTags()
@@ -83,16 +75,17 @@ export default function Event() {
     .filter((task) => task.due_date)
     .map((task) => new Date(task.due_date))
 
-  const [range, setRange] = React.useState<DateRange | undefined>({
-    from: new Date(new Date().getFullYear(), 11, 8),
-    to: addDays(new Date(new Date().getFullYear(), 11, 8), 10),
-  })
+  // Remove the range state since we're using single date selection
+  // const [range, setRange] = React.useState<DateRange | undefined>({
+  //   from: new Date(new Date().getFullYear(), 11, 8),
+  //   to: addDays(new Date(new Date().getFullYear(), 11, 8), 10),
+  // })
 
-  async function insertEevent() {
+  async function insertEvent() {
     setError("")
     setSuccess("")
 
-    if (!title || !date) {
+    if (!title || !selectedDate) {
       setError("Required fields are missing")
       return
     }
@@ -108,8 +101,23 @@ export default function Event() {
 
     if (res.ok) {
       setSuccess("Task created")
+      // Reset form after successful creation
+      setTitle("")
+      setContent("")
+      setTag("")
+      setSelectedDate(undefined)
+      setDue_date("")
     } else {
       setError(data.error)
+    }
+  }
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date)
+    if (date) {
+      setDue_date(format(date, "yyyy-MM-dd"))
+    } else {
+      setDue_date("")
     }
   }
 
@@ -153,7 +161,7 @@ export default function Event() {
                   />
                 </div>
 
-                {/* TODO: Add user-customizable tags */}
+                {/* Tag selection */}
                 <div className="grid gap-1.5">
                   <Label htmlFor="tags">Tag</Label>
 
@@ -181,100 +189,28 @@ export default function Event() {
                   </Select>
                 </div>
 
-                <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Create New Tag</DialogTitle>
-                    </DialogHeader>
-                    <Input
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          createTag()
-                        }
-                      }}
-                    />
-                    <div className="mt-4 flex justify-end">
-                      <Button
-                        variant="outline"
-                        onClick={() => setCreateOpen(false)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            setCreateOpen(false)
-                          }
-                        }}
-                        className="mr-2"
-                      >
-                        Cancel
-                      </Button>
-                      <Button onClick={createTag}>Create</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-
+                {/* Date display - shows selected date from the calendar */}
                 <div className="grid gap-1.5">
-                  <Popover>
-                    <PopoverTrigger
-                      render={
-                        <Button
-                          variant={"outline"}
-                          data-empty={!date}
-                          className="w-[212px] justify-between text-left font-normal data-[empty=true]:text-muted-foreground"
-                        >
-                          {date ? (
-                            format(date, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <ChevronDownIcon data-icon="inline-end" />
-                        </Button>
-                      }
-                    />
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={(selectedDate) => {
-                          setDate(selectedDate)
-                          setDue_date(
-                            selectedDate
-                              ? format(selectedDate, "yyyy-MM-dd")
-                              : ""
-                          )
-                        }}
-                        defaultMonth={date}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Label>Due Date</Label>
+                  <div className="rounded-md border p-2 text-sm">
+                    {selectedDate ? (
+                      format(selectedDate, "PPP")
+                    ) : (
+                      <span className="text-muted-foreground">
+                        Select a date from the calendar on the right
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              <AlertDialog>
-                <AlertDialogTrigger
-                  render={
-                    <Button
-                      onClick={insertEevent}
-                      className="w-[80%] bg-slate-800 text-white hover:bg-slate-700"
-                    >
-                      Create
-                    </Button>
-                  }
-                ></AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogTitle>
-                    {error && <p className="text-sm text-red-500">{error}</p>}
-                    {success && (
-                      <p className="text-sm text-green-500">{success}</p>
-                    )}
-                  </AlertDialogTitle>
-                  <AlertDialogCancel>Add Task</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => router.push("/Dashboard")}>
-                    Return to Dashboard
-                  </AlertDialogAction>
-                </AlertDialogContent>
-              </AlertDialog>
+              <Button
+                onClick={insertEvent}
+                className="w-[80%] bg-slate-800 text-white hover:bg-slate-700"
+              >
+                Create Task
+              </Button>
 
               <Button
                 onClick={() => router.push("/Dashboard")}
@@ -283,24 +219,51 @@ export default function Event() {
                 Return to dashboard
               </Button>
             </CardFooter>
+
+            {/* Success/Error Dialog */}
+            {(error || success) && (
+              <AlertDialog open={!!(error || success)}>
+                <AlertDialogContent>
+                  <AlertDialogTitle>
+                    {error && <p className="text-sm text-red-500">{error}</p>}
+                    {success && (
+                      <p className="text-sm text-green-500">{success}</p>
+                    )}
+                  </AlertDialogTitle>
+                  <AlertDialogCancel onClick={() => {
+                    setError("")
+                    setSuccess("")
+                  }}>
+                    Close
+                  </AlertDialogCancel>
+                  {success && (
+                    <AlertDialogAction onClick={() => router.push("/Dashboard")}>
+                      Return to Dashboard
+                    </AlertDialogAction>
+                  )}
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </Card>
         </div>
       </div>
 
-      <div className="lg:[50%] ml-40 hidden items-center justify-center p-12 text-white lg:flex">
+      {/* Calendar on the right - now used as the date selector */}
+      <div className="lg:w-[50%] hidden items-center justify-center p-12 text-white lg:flex">
         <Card className="mx-auto w-fit scale-125 p-0">
           <CardContent className="p-5">
             <Calendar
               id="date"
-              mode="range"
-              defaultMonth={range?.from}
-              selected={range}
-              onSelect={setRange}
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDateSelect}
+              defaultMonth={selectedDate || new Date()}
               numberOfMonths={1}
               captionLayout="dropdown"
               modifiers={{ hasTask: taskDates }}
               modifiersClassNames={{
                 hasTask: "bg-slate-900 text-white rounded-full",
+                selected: "bg-slate-800 text-white",
               }}
               className="md:[--cell-size--spacing(12)] [--cell-size:--spacing(10)]"
               formatters={{
@@ -326,6 +289,13 @@ export default function Event() {
                 },
               }}
             />
+            <div className="mt-4 text-center text-sm text-muted-foreground">
+              {selectedDate ? (
+                <p>Selected: {format(selectedDate, "PPP")}</p>
+              ) : (
+                <p>Click on a date to select it</p>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

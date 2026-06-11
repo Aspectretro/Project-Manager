@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -7,10 +8,43 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useTasks } from "@/hooks/useTasks"
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select"
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { useTags } from "@/hooks/useTag"
 
 export default function EventEditPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center p-8">
+          <Card className="w-full max-w-md">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+                <p className="text-center text-muted-foreground">Loading...</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
+      <EventEditPageContent />
+    </Suspense>
+  )
+}
+
+function EventEditPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const taskId = searchParams.get("task_id")
@@ -21,6 +55,11 @@ export default function EventEditPage() {
   const [due_date, setDueDate] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [createOpen, setCreateOpen] = useState(false)
+  const [newTag, setNewTag] = useState("")
+
+  // Fetch tags from your tag hook
+  const { tags, fetchTags } = useTags()
 
   // Fetch the existing task data on load
   useEffect(() => {
@@ -28,20 +67,34 @@ export default function EventEditPage() {
 
     async function fetchTask() {
       const res = await fetch(`http://localhost:5000/tasks/${taskId}`, {
-        credentials: "include"
+        credentials: "include",
       })
 
       if (res.ok) {
         const data = await res.json()
-        setTitle(data.title)
-        setContent(data.content)
-        setTag(data.tag)
+        setTitle(data.title || "")
+        setContent(data.content || "")
+        setTag(data.tag || "")
         setDueDate(data.due_date ?? "")
       }
     }
 
     fetchTask()
-  }, [taskId])
+    fetchTags()
+  }, [taskId, fetchTags])
+
+  async function createTag() {
+    if (!newTag.trim()) return
+    await fetch("http://localhost:5000/tags", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ name: newTag }),
+    })
+    setNewTag("")
+    setCreateOpen(false)
+    fetchTags()
+  }
 
   async function handleUpdate() {
     setError("")
@@ -56,7 +109,7 @@ export default function EventEditPage() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ title, content, tag, due_date })
+      body: JSON.stringify({ title, content, tag, due_date }),
     })
 
     const data = await res.json()
@@ -86,6 +139,7 @@ export default function EventEditPage() {
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
+
             <div className="grid gap-1.5">
               <Label htmlFor="content">Description</Label>
               <Textarea
@@ -93,26 +147,32 @@ export default function EventEditPage() {
                 value={content ?? ""}
                 placeholder="Task description"
                 onChange={(e) => setContent(e.target.value)}
-              ></Textarea>
+              />
             </div>
 
-            {/* TODO: Add user customisable tag, then map them.
-                In the profile page, there should be an alert dialogue to open all tag hence modifications
-            */}
+            {/* Tag Section */}
             <div className="grid gap-1.5">
-              <Label htmlFor="tag">Tag</Label>
+              <Label htmlFor="tags">Tag</Label>
               <Select value={tag} onValueChange={(value) => setTag(value ?? "")}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a tag" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="tag1">Tag 1</SelectItem>
-                  <SelectItem value="tag2">Tag 2</SelectItem>
-                  <SelectItem value="tag3">Tag 3</SelectItem>
+                  {tags.map((t) => (
+                    <SelectItem key={t.tag_id} value={t.name}>
+                      {t.name}
+                    </SelectItem>
+                  ))}
+                  <hr className="my-1 border-t" />
+                  <div
+                    className="flex cursor-pointer items-center justify-center p-2 text-sm text-slate-500 hover:bg-slate-100"
+                    onClick={() => setCreateOpen(true)}
+                  >
+                    + Create New Tag
+                  </div>
                 </SelectContent>
               </Select>
             </div>
-
 
             <div className="grid gap-1.5">
               <Label htmlFor="due_date">Due Date</Label>
@@ -124,8 +184,10 @@ export default function EventEditPage() {
               />
             </div>
 
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-            {success && <p className="text-green-600 text-sm text-center">{success}</p>}
+            {error && <p className="text-center text-sm text-red-500">{error}</p>}
+            {success && (
+              <p className="text-center text-sm text-green-600">{success}</p>
+            )}
 
             <Button
               onClick={handleUpdate}
@@ -133,15 +195,42 @@ export default function EventEditPage() {
             >
               Save Changes
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => router.push("/Dashboard")}
-            >
+
+            <Button variant="outline" onClick={() => router.push("/Dashboard")}>
               Cancel
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Create New Tag Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Tag</DialogTitle>
+          </DialogHeader>
+          <Input
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                createTag()
+              }
+            }}
+            placeholder="Enter tag name"
+          />
+          <div className="mt-4 flex justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setCreateOpen(false)}
+              className="mr-2"
+            >
+              Cancel
+            </Button>
+            <Button onClick={createTag}>Create</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
