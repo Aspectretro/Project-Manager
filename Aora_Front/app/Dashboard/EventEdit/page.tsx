@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -22,14 +23,15 @@ import {
 } from "@/components/ui/dialog"
 import { useTags } from "@/hooks/useTag"
 
-export default function EventEditPage() {
+// Inner component that uses useSearchParams
+function EventEditPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const taskId = searchParams.get("task_id")
 
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
-  const [tag, setTag] = useState("")  // Changed from tags to tag for selected value
+  const [tag, setTag] = useState("")
   const [due_date, setDueDate] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -52,13 +54,13 @@ export default function EventEditPage() {
         const data = await res.json()
         setTitle(data.title || "")
         setContent(data.content || "")
-        setTag(data.tag || "")  // Set the selected tag
+        setTag(data.tag || "")
         setDueDate(data.due_date ?? "")
       }
     }
 
     fetchTask()
-    fetchTags() // Fetch available tags
+    fetchTags()
   }, [taskId, fetchTags])
 
   async function createTag() {
@@ -71,7 +73,7 @@ export default function EventEditPage() {
     })
     setNewTag("")
     setCreateOpen(false)
-    fetchTags() // Refresh tags list
+    fetchTags()
   }
 
   async function handleUpdate() {
@@ -87,7 +89,7 @@ export default function EventEditPage() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ title, content, tag, due_date }), // Send single tag, not array
+      body: JSON.stringify({ title, content, tag, due_date }),
     })
 
     const data = await res.json()
@@ -128,7 +130,7 @@ export default function EventEditPage() {
               />
             </div>
 
-            {/* Fixed Tag Section */}
+            {/* Tag Section */}
             <div className="grid gap-1.5">
               <Label htmlFor="tags">Tag</Label>
               <Select
@@ -215,5 +217,25 @@ export default function EventEditPage() {
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+// Main component with Suspense boundary
+export default function EventEditPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center p-8">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+              <p className="text-center text-muted-foreground">Loading...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <EventEditPageInner />
+    </Suspense>
   )
 }
