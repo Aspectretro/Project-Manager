@@ -23,8 +23,28 @@ import {
 } from "@/components/ui/dialog"
 import { useTags } from "@/hooks/useTag"
 
-// Inner component that uses useSearchParams
-function EventEditPageInner() {
+export default function EventEditPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center p-8">
+          <Card className="w-full max-w-md">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+                <p className="text-center text-muted-foreground">Loading...</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
+      <EventEditPageContent />
+    </Suspense>
+  )
+}
+
+function EventEditPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const taskId = searchParams.get("task_id")
@@ -119,7 +139,7 @@ function EventEditPageInner() {
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
-            
+
             <div className="grid gap-1.5">
               <Label htmlFor="content">Description</Label>
               <Textarea
@@ -133,10 +153,7 @@ function EventEditPageInner() {
             {/* Tag Section */}
             <div className="grid gap-1.5">
               <Label htmlFor="tags">Tag</Label>
-              <Select
-                value={tag}
-                onValueChange={(value) => setTag(value ?? "")}
-              >
+              <Select value={tag} onValueChange={(value) => setTag(value ?? "")}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a tag" />
                 </SelectTrigger>
@@ -167,9 +184,7 @@ function EventEditPageInner() {
               />
             </div>
 
-            {error && (
-              <p className="text-center text-sm text-red-500">{error}</p>
-            )}
+            {error && <p className="text-center text-sm text-red-500">{error}</p>}
             {success && (
               <p className="text-center text-sm text-green-600">{success}</p>
             )}
@@ -180,7 +195,7 @@ function EventEditPageInner() {
             >
               Save Changes
             </Button>
-            
+
             <Button variant="outline" onClick={() => router.push("/Dashboard")}>
               Cancel
             </Button>
@@ -217,25 +232,5 @@ function EventEditPageInner() {
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
-
-// Main component with Suspense boundary
-export default function EventEditPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center p-8">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
-              <p className="text-center text-muted-foreground">Loading...</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    }>
-      <EventEditPageInner />
-    </Suspense>
   )
 }
