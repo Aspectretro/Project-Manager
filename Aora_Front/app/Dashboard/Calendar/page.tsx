@@ -252,7 +252,7 @@ export default function CalendarPage() {
                   <Button
                     variant="outline"
                     className="mt-4"
-                    onClick={() => router.push("/Dashboard/Event")}
+                    onClick={() => router.push("/Event")}
                   >
                     Create a task
                   </Button>
