@@ -17,6 +17,7 @@ import { useUser } from "@/hooks/useUser"
 import { useRouter } from "next/navigation"
 import { GoTasklist } from "react-icons/go"
 import { AiOutlineProject } from "react-icons/ai"
+import { useState, useEffect } from "react"
 
 const items = [
   { title: "Home", url: "/Dashboard", icon: Home },
@@ -27,6 +28,11 @@ const items = [
 export function AppSidebar() {
   const { user, loading } = useUser()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   function profileClick(e: React.MouseEvent) {
     e.preventDefault()
@@ -37,15 +43,45 @@ export function AppSidebar() {
     }
   }
 
+  // Prevent hydration mismatch by not rendering user-dependent content until mounted
+  if (!mounted) {
+    return (
+      <Sidebar variant="inset" collapsible="icon">
+        <SidebarHeader className="p-4">
+          <div className="flex items-center gap-2 text-xl font-bold">
+            <img src="/Aora.png" className="w-[30%] border-2 border-solid" alt="Logo" />
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          {/* Skeleton loading state */}
+          <SidebarGroup>
+            <SidebarGroupLabel>Main</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-2">
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+    )
+  }
+
   return (
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2 text-xl font-bold">
-          <img src="/Aora.png" className="w-[30%] border-2 border-solid" />
+          <img src="/Aora.png" className="w-[30%] border-2 border-solid" alt="Logo" />
         </div>
       </SidebarHeader>
 
-      {/* Main Dashboard */}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Main</SidebarGroupLabel>
@@ -53,10 +89,7 @@ export function AppSidebar() {
             <SidebarMenu className="gap-2">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    render={<a href={item.url} />}
-                    tooltip={item.title}
-                  >
+                  <SidebarMenuButton render={<a href={item.url} />} tooltip={item.title}>
                     <item.icon />
                     <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
                       {item.title}
@@ -68,7 +101,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Task */}
         <SidebarGroup>
           <SidebarGroupLabel>Management</SidebarGroupLabel>
           <SidebarContent>
@@ -85,15 +117,12 @@ export function AppSidebar() {
           </SidebarContent>
         </SidebarGroup>
 
-        {/* Collaboration */}
         <SidebarGroup>
           <SidebarGroupLabel>Collaboration</SidebarGroupLabel>
           <SidebarContent>
             <SidebarMenu className="gap-2">
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  render={<a href="/Dashboard/Collaboration/Project" />}
-                >
+                <SidebarMenuButton render={<a href="/Dashboard/Collaboration/Project" />}>
                   <AiOutlineProject />
                   <span className="transition-all duration-200 group-data-[collapsible=icon]:hidden">
                     Project
@@ -104,7 +133,6 @@ export function AppSidebar() {
           </SidebarContent>
         </SidebarGroup>
 
-        {/* Pushed to bottom using mt-auto */}
         <SidebarGroup className="mt-auto">
           <SidebarMenu>
             <SidebarMenuItem>
